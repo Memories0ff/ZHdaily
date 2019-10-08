@@ -249,7 +249,7 @@
         }*/
 
 
-加载新闻内容代码（提前记录）：
+加载新闻内容代码（提前记录，方便以后编码）：
         new Thread(new Runnable() {
             @Override
             public void run() {
