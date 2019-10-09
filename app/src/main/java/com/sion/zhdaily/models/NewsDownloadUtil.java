@@ -1,26 +1,14 @@
-package com.sion.zhdaily.utils;
+package com.sion.zhdaily.models;
 
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
-
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class NewsUtil {
+public class NewsDownloadUtil {
 
     //获取多个最新及头条新闻Json
     public static String getLatestNewsSummariesJson() {
@@ -71,36 +59,6 @@ public class NewsUtil {
                 Log.e("Json", "连接失败");
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    //从Json获取多个新闻简介
-    public static List<NewsSummary> getNewsSummaries(String newsJson) {
-        List<NewsSummary> newsSummaries = new ArrayList<>();
-        try {
-            JSONArray array = new JSONObject(newsJson).getJSONArray("stories");
-            for (int i = 0; i < array.length(); i++) {
-                newsSummaries.add(new NewsSummary(array.getJSONObject(i).toString(), false));
-            }
-            return newsSummaries;
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    //从Json获取所有头条新闻简介
-    public static List<NewsSummary> getTopNewsSummaries(String latestNewsJson) {
-        List<NewsSummary> newsSummaries = new ArrayList<>();
-        try {
-            JSONArray array = new JSONObject(latestNewsJson).getJSONArray("top_stories");
-            for (int i = 0; i < array.length(); i++) {
-                newsSummaries.add(new NewsSummary(array.getJSONObject(i).toString(), true));
-            }
-            return newsSummaries;
-        } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
