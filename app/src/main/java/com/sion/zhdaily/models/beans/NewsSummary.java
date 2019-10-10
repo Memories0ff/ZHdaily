@@ -7,10 +7,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class NewsSummary {
+    //新闻ID
     private int id;
+    //标题
     private String title;
+    //内容URL
     private String newsContentUrl;
+    //提示内容
     private String hint;
+    //标题图片URL
     private String imageUrl;
 
     public int getId() {

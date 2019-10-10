@@ -4,13 +4,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class NewsContent {
+    //标题
     private String title;
+    //HTML新闻内容
     private String htmlContent;
+    //图片URL
     private String imageUrl;
+    //CSS URL
     private String cssUrl;
+    //点赞数
     private int popularity;
+    //长评数
     private int longComments;
+    //短评数
     private int shortComments;
+    //总评数
     private int comments;
 
     public String getTitle() {
