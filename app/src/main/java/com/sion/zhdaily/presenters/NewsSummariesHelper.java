@@ -4,6 +4,7 @@ import com.sion.zhdaily.models.NewsSummariesUtil;
 import com.sion.zhdaily.models.beans.NewsSummary;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -24,9 +25,9 @@ public class NewsSummariesHelper {
 //    public int latestNewsNum;
 
     //头条新闻列表
-    public List<NewsSummary> topNewsSummariesList = null;
+    public List<NewsSummary> topNewsSummariesList = new ArrayList<>();
     //其他非头条新闻列表
-    public List<NewsSummary> newsSummariesList = null;
+    public List<NewsSummary> newsSummariesList = new ArrayList<>();
 
     public NewsSummariesHelper() {
         isTodayNewsSummariesLoaded = false;
@@ -57,12 +58,17 @@ public class NewsSummariesHelper {
         return new SimpleDateFormat("yyyyMMdd").format(date);
     }
 
+    //date转xx月xx日星期x
+    public String dateMonthDayWeek(Date date) {
+        return new SimpleDateFormat("MM月dd日 EEEE").format(date);
+    }
+
     //逐天获取新闻。第一次加载的是头条和最新新闻，放在同一个List中，先放入的是头条新闻
-    public void getNewsSummaries() {
+    public void getNewsSummariesDayByDay() {
         //最新新闻和头条新闻未加载时，先加载
         if (!isTodayNewsSummariesLoaded) {
-            topNewsSummariesList = NewsSummariesUtil.getTopNewsSummaries();
-            newsSummariesList = NewsSummariesUtil.getLatestNewsSummaries();
+            topNewsSummariesList.addAll(NewsSummariesUtil.getTopNewsSummaries());
+            newsSummariesList.addAll(NewsSummariesUtil.getLatestNewsSummaries());
             //最新新闻和头条新闻设为已加载
             isTodayNewsSummariesLoaded = true;
         }
@@ -84,7 +90,7 @@ public class NewsSummariesHelper {
         currentLoadedNewsSummariesDate = new Date();
         currentLoadedNewsSummariesDateString = dateToString(currentLoadedNewsSummariesDate);
         //获取头条和最新新闻列表
-        getNewsSummaries();
+        getNewsSummariesDayByDay();
     }
 
     //更新视图接口
