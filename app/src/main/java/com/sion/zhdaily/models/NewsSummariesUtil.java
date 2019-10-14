@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -24,7 +27,7 @@ public class NewsSummariesUtil {
     //获取多个最新及头条新闻Json
     public static String getTodayNewsSummariesJson() {
         Request.Builder builder = new Request.Builder();
-        builder.url("http://118.89.204.190/api/4/stories/latest")
+        builder.url("https://www.zhihu.com/api/4/stories/latest")
                 //添加Header防400 Bad Request
                 .addHeader("Host", "news-at.zhihu.com")
                 .addHeader("User-Agent", "DailyApi/4 (Linux; Android 5.1.1; OPPO R11 Build/OPPO /R11/R11/NMF26X/zh_CN) Google-HTTP-Java-Client/1.22.0 (gzip) Google-HTTP-Java-Client/1.22.0 (gzip)")
@@ -34,7 +37,14 @@ public class NewsSummariesUtil {
                 .addHeader("Pragma", "no-cache")
                 .addHeader("Cache-Control", "no-cache");
         Request request = builder.build();
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder().hostnameVerifier(new HostnameVerifier() {
+
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                //强行返回true 即验证成功
+                return true;
+            }
+        }).build();
         try {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()) {
@@ -56,7 +66,7 @@ public class NewsSummariesUtil {
     //获取以前某天前一天的多个新闻json
     public static String getOldNewsSummariesJson(String date) {
         Request.Builder builder = new Request.Builder();
-        builder.url("http://118.89.204.190/api/4/stories/before/" + date)
+        builder.url("https://www.zhihu.com/api/4/stories/before/" + date)
                 //添加Header防400 Bad Request
                 .addHeader("Host", "news-at.zhihu.com")
                 .addHeader("User-Agent", "DailyApi/4 (Linux; Android 5.1.1; OPPO R11 Build/OPPO /R11/R11/NMF26X/zh_CN) Google-HTTP-Java-Client/1.22.0 (gzip) Google-HTTP-Java-Client/1.22.0 (gzip)")
@@ -66,7 +76,14 @@ public class NewsSummariesUtil {
                 .addHeader("Pragma", "no-cache")
                 .addHeader("Cache-Control", "no-cache");
         Request request = builder.build();
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient().newBuilder().hostnameVerifier(new HostnameVerifier() {
+
+            @Override
+            public boolean verify(String hostname, SSLSession session) {
+                //强行返回true 即验证成功
+                return true;
+            }
+        }).build();
         try {
             Response response = client.newCall(request).execute();
             if (response.isSuccessful()) {

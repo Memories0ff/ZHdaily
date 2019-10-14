@@ -7,15 +7,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -30,7 +30,25 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     //数据源
     public List<NewsSummary> mContents;
     //列表头部
-    private int mHeaderViewResourceId = 0;
+
+    View mHeaderView;
+    TopNewsSummaryPagerAdapter pagerAdapter;
+
+    public View getmHeaderView() {
+        return mHeaderView;
+    }
+
+    public void setmHeaderView(View mHeaderView) {
+        this.mHeaderView = mHeaderView;
+    }
+
+    public TopNewsSummaryPagerAdapter getPagerAdapter() {
+        return pagerAdapter;
+    }
+
+    public void setPagerAdapter(TopNewsSummaryPagerAdapter pagerAdapter) {
+        this.pagerAdapter = pagerAdapter;
+    }
 
     //是否正在加载内容
     private boolean isLoading = false;
@@ -49,19 +67,18 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         this.mContents = mContents;
     }
 
-    public NewsSummaryListRvAdapter(MainActivity mainActivity, RecyclerView mRv, List<NewsSummary> mContents, int headerViewResourceId) {
+    public NewsSummaryListRvAdapter(MainActivity mainActivity, RecyclerView mRv, List<NewsSummary> mContents, View headerView) {
         this.mainActivity = mainActivity;
         this.mRv = mRv;
         this.mContents = mContents;
-        this.mHeaderViewResourceId = headerViewResourceId;
+        this.mHeaderView = headerView;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == ITEM_TYPE.HEADER.ordinal()) {
-            View headerView = LayoutInflater.from(mainActivity).inflate(mHeaderViewResourceId, parent, false);
-            return new HeaderViewHolder(headerView);
+            return new HeaderViewHolder(mHeaderView);
         } else {
             View view = LayoutInflater.from(mainActivity).inflate(R.layout.rv_summary_item_view, parent, false);
             return new NewsSummaryViewHolder(view);
@@ -97,7 +114,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
 
     @Override
     public int getItemViewType(int position) {
-        if (mHeaderViewResourceId == 0) {
+        if (mHeaderView == null) {
             return ITEM_TYPE.NORMAL.ordinal();
         } else {
             if (position == 0) {
@@ -110,7 +127,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
 
     @Override
     public int getItemCount() {
-        if (mHeaderViewResourceId == 0) {
+        if (mHeaderView == null) {
             if (mContents == null) {
                 return 0;
             } else {
@@ -127,12 +144,12 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     }
 
     public void notifyNewsSummaryItemInserted(int positionStart, int itemCount) {
-        int startOffset = mHeaderViewResourceId == 0 ? 0 : 1;
+        int startOffset = mHeaderView == null ? 0 : 1;
         notifyItemRangeInserted(positionStart + startOffset, itemCount);
     }
 
     public int getReadPosition(int position) {
-        if (mHeaderViewResourceId == 0) {
+        if (mHeaderView == null) {
             return position;
         } else {
             return position - 1;
