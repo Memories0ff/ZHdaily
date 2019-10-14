@@ -17,6 +17,10 @@ public class NewsSummary {
     private String hint;
     //标题图片URL
     private String imageUrl;
+    //日期“xx月xx日 星期x”
+    private String dateStr;
+    //是这一天中加载的第一条新闻
+    private boolean isFirstNewsSummary;
 
     public int getId() {
         return id;
@@ -58,6 +62,22 @@ public class NewsSummary {
         this.imageUrl = imageUrl;
     }
 
+    public String getDateStr() {
+        return dateStr;
+    }
+
+    public void setDateStr(String dateStr) {
+        this.dateStr = dateStr;
+    }
+
+    public boolean isFirstNewsSummary() {
+        return isFirstNewsSummary;
+    }
+
+    public void setFirstNewsSummary(boolean firstNewsSummary) {
+        isFirstNewsSummary = firstNewsSummary;
+    }
+
     public NewsSummary(String json, boolean isTop) {
         try {
             JSONObject object = new JSONObject(json);
@@ -66,6 +86,7 @@ public class NewsSummary {
             this.newsContentUrl = object.getString("url");
             this.hint = object.getString("hint");
             this.imageUrl = isTop ? (object.getString("image")) : (object.getJSONArray("images").getString(0));
+            this.isFirstNewsSummary = false;
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -74,6 +95,6 @@ public class NewsSummary {
     @NonNull
     @Override
     public String toString() {
-        return String.format("id:%d | title:%s | newsContentUrl:%s | hint:%s | imageUrl:%s", this.id, this.title, this.newsContentUrl, this.hint, this.imageUrl);
+        return String.format("first:%s | date:%s | id:%d | title:%s | newsContentUrl:%s | hint:%s | imageUrl:%s", isFirstNewsSummary, dateStr, this.id, this.title, this.newsContentUrl, this.hint, this.imageUrl);
     }
 }

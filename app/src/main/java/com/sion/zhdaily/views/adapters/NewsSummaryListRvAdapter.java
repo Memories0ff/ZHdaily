@@ -19,25 +19,18 @@ import java.util.List;
 
 public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-//    enum ITEM_TYPE {
-//        //新闻
-//        SUMMARIES_ITEM,
-//        //日期
-//        DATE_ITEM,
-//        //头条
-//        TOP_ITEM
-//    }
-
-    //统计已经加载的DateItem数
-//    private int dateItemNum = 0;
-
+    enum ITEM_TYPE {
+        HEADER, NORMAL
+    }
 
     //从属的Activity
     public MainActivity mainActivity;
     //对应的RecyclerView
     public RecyclerView mRv;
-    //内容列表
+    //数据源
     public List<NewsSummary> mContents;
+    //列表头部
+    private int mHeaderViewResourceId = 0;
 
     //是否正在加载内容
     private boolean isLoading = false;
@@ -50,79 +43,109 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         isLoading = loading;
     }
 
-
     public NewsSummaryListRvAdapter(MainActivity mainActivity, RecyclerView mRv, List<NewsSummary> mContents) {
         this.mainActivity = mainActivity;
         this.mRv = mRv;
         this.mContents = mContents;
     }
 
+    public NewsSummaryListRvAdapter(MainActivity mainActivity, RecyclerView mRv, List<NewsSummary> mContents, int headerViewResourceId) {
+        this.mainActivity = mainActivity;
+        this.mRv = mRv;
+        this.mContents = mContents;
+        this.mHeaderViewResourceId = headerViewResourceId;
+    }
+
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-//        if (viewType == ITEM_TYPE.SUMMARIES_ITEM.ordinal()) {
-        View view = LayoutInflater.from(mainActivity).inflate(R.layout.rv_summary_item_view, parent, false);
-        return new NewsSummaryViewHolder(view);
-//        } else if (viewType == ITEM_TYPE.DATE_ITEM.ordinal()) {
-//            View view = LayoutInflater.from(mainActivity).inflate(R.layout.rv_date_item_view, parent, false);
-//            return new DateItemViewHolder(view);
-//        } else if (viewType == ITEM_TYPE.TOP_ITEM.ordinal()) {
-//            View view = LayoutInflater.from(mainActivity).inflate(R.layout.rv_top_item_view, parent, false);
-//            return new TopNewsSummaryViewHolder(view);
-//        }
-//        return null;
+        if (viewType == ITEM_TYPE.HEADER.ordinal()) {
+            View headerView = LayoutInflater.from(mainActivity).inflate(mHeaderViewResourceId, parent, false);
+            return new HeaderViewHolder(headerView);
+        } else {
+            View view = LayoutInflater.from(mainActivity).inflate(R.layout.rv_summary_item_view, parent, false);
+            return new NewsSummaryViewHolder(view);
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-//        int type = getItemViewType(position);
-//        int newsSummaryPosition = position - 1 - mainActivity.helper.loadedNewsSummaryDays;
-//        if (type == ITEM_TYPE.SUMMARIES_ITEM.ordinal()) {
-        TextView textView = ((NewsSummaryViewHolder) holder).getTvNewsTitle();
-        textView.setText(mContents.get(position).getTitle());
+        if (getItemViewType(position) == ITEM_TYPE.HEADER.ordinal()) {
 
-        ImageView imageView = ((NewsSummaryViewHolder) holder).getIvNewsTitlePic();
-        Glide.with(mainActivity).load(mContents.get(position).getImageUrl()).into(imageView);
+        } else {
+            int realPosition = getReadPosition(position);
+            NewsSummaryViewHolder newsSummaryViewHolder = (NewsSummaryViewHolder) holder;
+            TextView textViewNewsTitle = newsSummaryViewHolder.getTvNewsTitle();
+            textViewNewsTitle.setText(mContents.get(realPosition).getTitle());
 
-        View itemView = ((NewsSummaryViewHolder) holder).getItemView();
-        itemView.setOnClickListener((v) -> Toast.makeText(mainActivity, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show());
+            ImageView imageView = newsSummaryViewHolder.getIvNewsTitlePic();
+            Glide.with(mainActivity).load(mContents.get(realPosition).getImageUrl()).into(imageView);
 
-//        } else if (type == ITEM_TYPE.DATE_ITEM.ordinal()) {
-//            //DateItem数+1
-////            ++dateItemNum;
-//            TextView textView = ((DateItemViewHolder) holder).getTvDate();
-//            textView.setText("xx月xx日 星期x");
-//        } else if (type == ITEM_TYPE.TOP_ITEM.ordinal()) {
-//            //加载顶部内容
-//        }
-        //??????????????????????????√
+            View clickableView = newsSummaryViewHolder.getClickableView();
+            clickableView.setOnClickListener((v) -> Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show());
+            if (mContents.get(realPosition).isFirstNewsSummary()) {
+                newsSummaryViewHolder.getTvNewsDate().setVisibility(View.VISIBLE);
+                newsSummaryViewHolder.getTvNewsDate().setText(mContents.get(realPosition).getDateStr());
+            }
+            //移出的View会直接重用，所以移出的显示日期的View在重用之后也还会显示之前的日期，要在这种情况下设置不显示
+            else {
+                newsSummaryViewHolder.getTvNewsDate().setVisibility(View.GONE);
+                newsSummaryViewHolder.getTvNewsDate().setText(null);
+            }
+        }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (mHeaderViewResourceId == 0) {
+            return ITEM_TYPE.NORMAL.ordinal();
+        } else {
+            if (position == 0) {
+                return ITEM_TYPE.HEADER.ordinal();
+            } else {
+                return ITEM_TYPE.NORMAL.ordinal();
+            }
+        }
     }
 
     @Override
     public int getItemCount() {
-        //?????????????????????????
-        return mContents == null ? 0 : mContents.size();
-//        int count = (mContents.size() + 1 + mainActivity.helper.loadedNewsSummaryDays);
-//        return mContents == null ? 0 : count;
+        if (mHeaderViewResourceId == 0) {
+            if (mContents == null) {
+                return 0;
+            } else {
+                return mContents.size();
+            }
+        } else {
+            if (mContents == null) {
+                return 1;
+            } else {
+                return mContents.size() + 1;
+            }
+        }
+//        return mContents == null ? 0 : mainActivity.helper.newsSummariesList.size();
     }
 
-//    @Override
-//    public int getItemViewType(int position) {
-//        //???????????????????????????
-//        if (position == 0) {
-//            return ITEM_TYPE.TOP_ITEM.ordinal();
-//        } else if (position == 1 || position == 1 + mContents.size() + mainActivity.helper.loadedNewsSummaryDays) {
-//            return ITEM_TYPE.DATE_ITEM.ordinal();
-//        } else {
-//            return ITEM_TYPE.SUMMARIES_ITEM.ordinal();
-//        }
-//    }
+    public void notifyNewsSummaryItemInserted(int positionStart, int itemCount) {
+        int startOffset = mHeaderViewResourceId == 0 ? 0 : 1;
+        notifyItemRangeInserted(positionStart + startOffset, itemCount);
+    }
+
+    public int getReadPosition(int position) {
+        if (mHeaderViewResourceId == 0) {
+            return position;
+        } else {
+            return position - 1;
+        }
+    }
 
     class NewsSummaryViewHolder extends RecyclerView.ViewHolder {
 
         private View itemView;
         private TextView tvNewsTitle;
         private ImageView ivNewsTitlePic;
+        private TextView tvNewsDate;
+        private View clickableView;
 
         public View getItemView() {
             return itemView;
@@ -144,8 +167,24 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             return ivNewsTitlePic;
         }
 
+        public TextView getTvNewsDate() {
+            return tvNewsDate;
+        }
+
+        public void setTvNewsDate(TextView tvNewsDate) {
+            this.tvNewsDate = tvNewsDate;
+        }
+
         public void setIvNewsTitlePic(ImageView ivNewsTitlePic) {
             this.ivNewsTitlePic = ivNewsTitlePic;
+        }
+
+        public View getClickableView() {
+            return clickableView;
+        }
+
+        public void setClickableView(View clickableView) {
+            this.clickableView = clickableView;
         }
 
         public NewsSummaryViewHolder(@NonNull View itemView) {
@@ -153,12 +192,12 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             this.itemView = itemView;
             this.tvNewsTitle = itemView.findViewById(R.id.tv_newsTitle);
             this.ivNewsTitlePic = itemView.findViewById(R.id.iv_newsTitlePic);
+            this.tvNewsDate = itemView.findViewById(R.id.tv_newsDate);
+            this.clickableView = itemView.findViewById(R.id.clickable_view);
         }
     }
 
-    class DateItemViewHolder extends RecyclerView.ViewHolder {
-        private View itemView;
-        private TextView tvDate;
+    class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         public View getItemView() {
             return itemView;
@@ -168,46 +207,10 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             this.itemView = itemView;
         }
 
-        public TextView getTvDate() {
-            return tvDate;
-        }
-
-        public void setTvDate(TextView tvDate) {
-            this.tvDate = tvDate;
-        }
-
-        public DateItemViewHolder(@NonNull View itemView) {
-            super(itemView);
-            this.itemView = itemView;
-            this.tvDate = itemView.findViewById(R.id.tv_date);
-        }
-    }
-
-    class TopNewsSummaryViewHolder extends RecyclerView.ViewHolder {
-
         private View itemView;
-        private ImageView ivTopPic;
 
-        public View getItemView() {
-            return itemView;
-        }
-
-        public void setItemView(View itemView) {
-            this.itemView = itemView;
-        }
-
-        public ImageView getIvTopPic() {
-            return ivTopPic;
-        }
-
-        public void setIvTopPic(ImageView ivTopPic) {
-            this.ivTopPic = ivTopPic;
-        }
-
-        public TopNewsSummaryViewHolder(@NonNull View itemView) {
+        public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.itemView = itemView;
-            this.ivTopPic = itemView.findViewById(R.id.iv_topPic);
         }
     }
 }

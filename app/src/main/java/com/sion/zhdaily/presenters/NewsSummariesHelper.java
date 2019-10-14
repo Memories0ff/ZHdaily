@@ -29,6 +29,13 @@ public class NewsSummariesHelper {
     //其他非头条新闻列表
     public List<NewsSummary> newsSummariesList = new ArrayList<>();
 
+    //加载了多少天的新闻
+//    public int loadedDays = 0;
+    //RecyclerView中插入数据的起始位置
+    public int insertRangeStartPosition = 0;
+    //本次加载了多少新闻
+    public int loadedNewsSummaryNum = 0;
+
     public NewsSummariesHelper() {
         isTodayNewsSummariesLoaded = false;
         currentLoadedNewsSummariesDate = new Date();
@@ -68,13 +75,34 @@ public class NewsSummariesHelper {
         //最新新闻和头条新闻未加载时，先加载
         if (!isTodayNewsSummariesLoaded) {
             topNewsSummariesList.addAll(NewsSummariesUtil.getTopNewsSummaries());
-            newsSummariesList.addAll(NewsSummariesUtil.getLatestNewsSummaries());
+            List<NewsSummary> tempList = NewsSummariesUtil.getLatestNewsSummaries();
+            //后面的为SUMMARIES_ITEM
+            for (int i = 0; i < tempList.size(); i++) {
+                //设置NewsSummary中未设置的属性dateStr和isFirstNewsSummary
+                tempList.get(i).setDateStr("今日热闻");
+                if (i == 0) {
+                    tempList.get(i).setFirstNewsSummary(true);
+                }
+            }
+            loadedNewsSummaryNum = tempList.size();
+            newsSummariesList.addAll(tempList);
             //最新新闻和头条新闻设为已加载
             isTodayNewsSummariesLoaded = true;
         }
         //加载旧新闻
         else {
-            newsSummariesList.addAll(NewsSummariesUtil.getOldNewsSummaries(currentLoadedNewsSummariesDateString));
+            insertRangeStartPosition = newsSummariesList.size()/* + 1*/;
+            List<NewsSummary> tempList = NewsSummariesUtil.getOldNewsSummaries(currentLoadedNewsSummariesDateString);
+            loadedNewsSummaryNum = tempList.size();
+            for (int i = 0; i < tempList.size(); i++) {
+                //设置NewsSummary中的属性dateStr和isFirstNewsSummary
+                tempList.get(i).setDateStr(dateMonthDayWeek(toLastDay(currentLoadedNewsSummariesDate)));
+                if (i == 0) {
+                    tempList.get(i).setFirstNewsSummary(true);
+                }
+            }
+            newsSummariesList.addAll(tempList);
+
             //日期减一天
             currentLoadedNewsSummariesDate = toLastDay(currentLoadedNewsSummariesDate);
             currentLoadedNewsSummariesDateString = dateToString(currentLoadedNewsSummariesDate);
@@ -89,6 +117,10 @@ public class NewsSummariesHelper {
         isTodayNewsSummariesLoaded = false;
         currentLoadedNewsSummariesDate = new Date();
         currentLoadedNewsSummariesDateString = dateToString(currentLoadedNewsSummariesDate);
+        insertRangeStartPosition = 0;
+        loadedNewsSummaryNum = 0;
+        topNewsSummariesList.clear();
+        newsSummariesList.clear();
         //获取头条和最新新闻列表
         getNewsSummariesDayByDay();
     }

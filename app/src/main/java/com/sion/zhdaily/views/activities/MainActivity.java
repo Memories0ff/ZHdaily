@@ -25,15 +25,14 @@ public class MainActivity extends Activity {
 
         rv = findViewById(R.id.rv);
         rv.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new NewsSummaryListRvAdapter(this, rv, helper.newsSummariesList);
+        adapter = new NewsSummaryListRvAdapter(this, rv, helper.newsSummariesList, R.layout.rv_summary_header_view);
         rv.setAdapter(adapter);
         adapter.setLoading(true);
 
         new Thread(() -> {
             helper.getNewsSummariesDayByDay();
             runOnUiThread(() -> {
-//                adapter.notifyDataSetChanged();
-                adapter.notifyDataSetChanged();
+                adapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
                 adapter.setLoading(false);
             });
         }).start();

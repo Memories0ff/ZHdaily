@@ -38,8 +38,8 @@ public class NewsSummaryListRecyclerView extends RecyclerView {
 //                      Toast.makeText(mainActivity, "加载完成", Toast.LENGTH_SHORT).show();
                         //加载完成，设置为不在加载
                         mainActivity.runOnUiThread(() -> {
-                            adapter.notifyDataSetChanged();
-//                            adapter.notifyItemRangeInserted(mainActivity.helper.afterLastLoadedAllNewsSummaryNum + mainActivity.helper.loadedNewsSummaryDays + 2, mainActivity.helper.loadedNewsSummaryNum+1);
+//                            adapter.notifyDataSetChanged();
+                            adapter.notifyNewsSummaryItemInserted(mainActivity.helper.insertRangeStartPosition, mainActivity.helper.loadedNewsSummaryNum);
                             adapter.setLoading(false);
                         });
                     }).start();
