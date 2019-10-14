@@ -7,15 +7,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
 
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -30,9 +30,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     //数据源
     public List<NewsSummary> mContents;
     //列表头部
-
-    View mHeaderView;
-    TopNewsSummaryPagerAdapter pagerAdapter;
+    View mHeaderView = null;
 
     public View getmHeaderView() {
         return mHeaderView;
@@ -42,13 +40,6 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         this.mHeaderView = mHeaderView;
     }
 
-    public TopNewsSummaryPagerAdapter getPagerAdapter() {
-        return pagerAdapter;
-    }
-
-    public void setPagerAdapter(TopNewsSummaryPagerAdapter pagerAdapter) {
-        this.pagerAdapter = pagerAdapter;
-    }
 
     //是否正在加载内容
     private boolean isLoading = false;
@@ -87,10 +78,8 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (getItemViewType(position) == ITEM_TYPE.HEADER.ordinal()) {
-
-        } else {
-            int realPosition = getReadPosition(position);
+        if (getItemViewType(position) == ITEM_TYPE.NORMAL.ordinal()) {
+            int realPosition = getRealPosition(position);
             NewsSummaryViewHolder newsSummaryViewHolder = (NewsSummaryViewHolder) holder;
             TextView textViewNewsTitle = newsSummaryViewHolder.getTvNewsTitle();
             textViewNewsTitle.setText(mContents.get(realPosition).getTitle());
@@ -100,6 +89,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
 
             View clickableView = newsSummaryViewHolder.getClickableView();
             clickableView.setOnClickListener((v) -> Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show());
+            //某天的第一条新闻要显示日期
             if (mContents.get(realPosition).isFirstNewsSummary()) {
                 newsSummaryViewHolder.getTvNewsDate().setVisibility(View.VISIBLE);
                 newsSummaryViewHolder.getTvNewsDate().setText(mContents.get(realPosition).getDateStr());
@@ -140,7 +130,6 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
                 return mContents.size() + 1;
             }
         }
-//        return mContents == null ? 0 : mainActivity.helper.newsSummariesList.size();
     }
 
     public void notifyNewsSummaryItemInserted(int positionStart, int itemCount) {
@@ -148,7 +137,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         notifyItemRangeInserted(positionStart + startOffset, itemCount);
     }
 
-    public int getReadPosition(int position) {
+    public int getRealPosition(int position) {
         if (mHeaderView == null) {
             return position;
         } else {
@@ -216,6 +205,8 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
 
     class HeaderViewHolder extends RecyclerView.ViewHolder {
 
+        private View itemView;
+
         public View getItemView() {
             return itemView;
         }
@@ -223,8 +214,6 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         public void setItemView(View itemView) {
             this.itemView = itemView;
         }
-
-        private View itemView;
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
