@@ -3,13 +3,16 @@ package com.sion.zhdaily.views.activities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toolbar;
 
+import com.google.android.material.navigation.NavigationView;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.presenters.NewsSummariesHelper;
 import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
 import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager.widget.ViewPager;
 
@@ -23,6 +26,12 @@ public class MainActivity extends Activity {
     ViewPager vp = null;
     TopNewsSummaryPagerAdapter pagerAdapter = null;
 
+    Toolbar tb = null;
+
+    DrawerLayout dl = null;
+
+    NavigationView nv = null;
+
     public NewsSummariesHelper helper = new NewsSummariesHelper();
 
 
@@ -31,9 +40,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dl = findViewById(R.id.dl);
+
+        tb = findViewById(R.id.tb);
+
+        nv = findViewById(R.id.rl_navigationView);
+
         headerView = getLayoutInflater().inflate(R.layout.rv_summary_header_view, null, false);
         vp = headerView.findViewById(R.id.vp);
-        pagerAdapter = new TopNewsSummaryPagerAdapter(this, helper.topNewsSummariesList);
+        pagerAdapter = new TopNewsSummaryPagerAdapter(this, vp, helper.topNewsSummariesList);
         vp.setAdapter(pagerAdapter);
         pagerAdapter.setLoading(true);
 
@@ -48,6 +63,7 @@ public class MainActivity extends Activity {
             runOnUiThread(() -> {
                 pagerAdapter.notifyDataSetChanged();
                 pagerAdapter.setLoading(false);
+                pagerAdapter.startTimingPageRoll();
                 rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
                 rvAdapter.setLoading(false);
             });

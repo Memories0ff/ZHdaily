@@ -265,3 +265,104 @@
 
             }
         }).start();
+
+
+
+
+新闻内容界面：
+    使用了CollapsingToolbarLayout
+        在CollapsingToolbarLayout中加 app:statusBarScrim="@android:color/transparent"，并且在onCreate中调用getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)将状态栏设置为透明
+
+
+
+
+
+
+重要错误日志：
+    第一次上划自动加载内容时出错:
+        10/15 10:41:36: Launching 'app' on Nexus 5X API 28.
+        $ adb shell am start -n "com.sion.zhdaily/com.sion.zhdaily.views.activities.MainActivity" -a android.intent.action.MAIN -c android.intent.category.LAUNCHER
+        Waiting for process to come online...
+        Connected to process 10007 on device 'Nexus_5X_API_28 [emulator-5554]'.
+        Capturing and displaying logcat messages from application. This behavior can be disabled in the "Logcat output" section of the "Debugger" settings page.
+        I/om.sion.zhdail: Not late-enabling -Xcheck:jni (already on)
+        W/om.sion.zhdail: Unexpected CPU variant for X86 using defaults: x86_64
+        D/OpenGLRenderer: Skia GL Pipeline
+        D/: HostConnection::get() New Host Connection established 0x788b7d84a300, tid 10040
+        I/ConfigStore: android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasWideColorDisplay retrieved: 0
+            android::hardware::configstore::V1_0::ISurfaceFlingerConfigs::hasHDRDisplay retrieved: 0
+        I/OpenGLRenderer: Initialized EGL, version 1.4
+        D/OpenGLRenderer: Swap behavior 1
+        W/OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+        D/OpenGLRenderer: Swap behavior 0
+        D/EGL_emulation: eglCreateContext: 0x788b7d8722c0: maj 3 min 0 rcv 3
+        D/EGL_emulation: eglMakeCurrent: 0x788b7d8722c0: ver 3 0 (tinfo 0x788b7d80dbc0)
+        D/EGL_emulation: eglMakeCurrent: 0x788b7d8722c0: ver 3 0 (tinfo 0x788b7d80dbc0)
+        I/om.sion.zhdail: Background concurrent copying GC freed 38466(6MB) AllocSpace objects, 0(0B) LOS objects, 52% free, 1384KB/2MB, paused 563us total 224.957ms
+        W/om.sion.zhdail: Accessing hidden method Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setUseSessionTickets(Z)V (light greylist, reflection)
+            Accessing hidden method Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setHostname(Ljava/lang/String;)V (light greylist, reflection)
+            Accessing hidden method Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getAlpnSelectedProtocol()[B (light greylist, reflection)
+            Accessing hidden method Lcom/android/org/conscrypt/OpenSSLSocketImpl;->setAlpnProtocols([B)V (light greylist, reflection)
+        W/om.sion.zhdail: Accessing hidden method Ldalvik/system/CloseGuard;->get()Ldalvik/system/CloseGuard; (light greylist, reflection)
+        W/om.sion.zhdail: Accessing hidden method Ldalvik/system/CloseGuard;->open(Ljava/lang/String;)V (light greylist, reflection)
+            Accessing hidden method Ldalvik/system/CloseGuard;->warnIfOpen()V (light greylist, reflection)
+        D/NetworkSecurityConfig: No Network Security Config specified, using platform default
+        W/Glide: Failed to find GeneratedAppGlideModule. You should include an annotationProcessor compile dependency on com.github.bumptech.glide:compiler in your application and a @GlideModule annotated AppGlideModule implementation or LibraryGlideModules will be silently ignored
+        D/EGL_emulation: eglMakeCurrent: 0x788b7d8722c0: ver 3 0 (tinfo 0x788b7d80dbc0)
+        D/EGL_emulation: eglMakeCurrent: 0x788b7d8722c0: ver 3 0 (tinfo 0x788b7d80dbc0)
+        D/EGL_emulation: eglMakeCurrent: 0x788b7d8722c0: ver 3 0 (tinfo 0x788b7d80dbc0)
+        D/EGL_emulation: eglMakeCurrent: 0x788b7d8722c0: ver 3 0 (tinfo 0x788b7d80dbc0)
+        D/EGL_emulation: eglMakeCurrent: 0x788b7d8722c0: ver 3 0 (tinfo 0x788b7d80dbc0)
+        D/AndroidRuntime: Shutting down VM
+        E/AndroidRuntime: FATAL EXCEPTION: main
+            Process: com.sion.zhdaily, PID: 10007
+            java.lang.IndexOutOfBoundsException: Inconsistency detected. Invalid view holder adapter positionViewHolder{785464a position=11 id=-1, oldPos=4, pLpos:4 scrap [attachedScrap] tmpDetached no parent} com.sion.zhdaily.views.views.NewsSummaryListRecyclerView{665a9bb VFED..... ......ID 0,0-1080,1776 #7f080085 app:id/rv}, adapter:com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter@4a26ed8, layout:androidx.recyclerview.widget.LinearLayoutManager@9ff3231, context:com.sion.zhdaily.views.activities.MainActivity@5d97d16
+                at androidx.recyclerview.widget.RecyclerView$Recycler.validateViewHolderForOffsetPosition(RecyclerView.java:5715)
+                at androidx.recyclerview.widget.RecyclerView$Recycler.tryGetViewHolderForPositionByDeadline(RecyclerView.java:5898)
+                at androidx.recyclerview.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5858)
+                at androidx.recyclerview.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5854)
+                at androidx.recyclerview.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2230)
+                at androidx.recyclerview.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1557)
+                at androidx.recyclerview.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1517)
+                at androidx.recyclerview.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:612)
+                at androidx.recyclerview.widget.RecyclerView.dispatchLayoutStep1(RecyclerView.java:3875)
+                at androidx.recyclerview.widget.RecyclerView.dispatchLayout(RecyclerView.java:3639)
+                at androidx.recyclerview.widget.RecyclerView.onLayout(RecyclerView.java:4194)
+                at android.view.View.layout(View.java:20672)
+                at android.view.ViewGroup.layout(ViewGroup.java:6194)
+                at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1812)
+                at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1656)
+                at android.widget.LinearLayout.onLayout(LinearLayout.java:1565)
+                at android.view.View.layout(View.java:20672)
+                at android.view.ViewGroup.layout(ViewGroup.java:6194)
+                at android.widget.FrameLayout.layoutChildren(FrameLayout.java:323)
+                at android.widget.FrameLayout.onLayout(FrameLayout.java:261)
+                at android.view.View.layout(View.java:20672)
+                at android.view.ViewGroup.layout(ViewGroup.java:6194)
+                at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1812)
+                at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1656)
+                at android.widget.LinearLayout.onLayout(LinearLayout.java:1565)
+                at android.view.View.layout(View.java:20672)
+                at android.view.ViewGroup.layout(ViewGroup.java:6194)
+                at android.widget.FrameLayout.layoutChildren(FrameLayout.java:323)
+                at android.widget.FrameLayout.onLayout(FrameLayout.java:261)
+                at com.android.internal.policy.DecorView.onLayout(DecorView.java:753)
+                at android.view.View.layout(View.java:20672)
+                at android.view.ViewGroup.layout(ViewGroup.java:6194)
+                at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2792)
+                at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:2319)
+                at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1460)
+                at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:7183)
+                at android.view.Choreographer$CallbackRecord.run(Choreographer.java:949)
+                at android.view.Choreographer.doCallbacks(Choreographer.java:761)
+                at android.view.Choreographer.doFrame(Choreographer.java:696)
+                at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:935)
+                at android.os.Handler.handleCallback(Handler.java:873)
+                at android.os.Handler.dispatchMessage(Handler.java:99)
+                at android.os.Looper.loop(Looper.java:193)
+                at android.app.ActivityThread.main(ActivityThread.java:6669)
+                at java.lang.reflect.Method.invoke(Native Method)
+                at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+                at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+        I/Process: Sending signal. PID: 10007 SIG: 9
+        Process 10007 terminated.
