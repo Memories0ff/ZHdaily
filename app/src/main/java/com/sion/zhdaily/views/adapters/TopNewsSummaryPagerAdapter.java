@@ -2,7 +2,6 @@ package com.sion.zhdaily.views.adapters;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +27,7 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     List<NewsSummary> mContents = null;
     ViewPager vp = null;
 
-    private static Handler handler = new Handler();
+    private static Timer timer = new Timer();
 
     //是否正在加载内容
     boolean isLoading = false;
@@ -84,17 +83,16 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     }
 
     public void startTimingPageRoll() {
-        Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
                 ((Activity) mContext).runOnUiThread(() -> {
-                    if (mContents.size() > 0)
+                    if (mContents.size() > 0 && !isLoading())
+                        //????????此时子线程执行update()，变量mContent改为0，会产生错误，但几率很小
                         vp.setCurrentItem((vp.getCurrentItem() + 1) % mContents.size());
                 });
             }
         };
         timer.schedule(timerTask, 5000, 5000);
-
     }
 }

@@ -7,15 +7,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
+import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
 import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -26,11 +27,11 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     //从属的Activity
     public MainActivity mainActivity;
     //对应的RecyclerView
-    public RecyclerView mRv;
+    public NewsSummaryListRecyclerView mRv;
     //数据源
     public List<NewsSummary> mContents;
     //列表头部
-    View mHeaderView = null;
+    private View mHeaderView = null;
 
     public View getmHeaderView() {
         return mHeaderView;
@@ -52,17 +53,30 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         isLoading = loading;
     }
 
-    public NewsSummaryListRvAdapter(MainActivity mainActivity, RecyclerView mRv, List<NewsSummary> mContents) {
-        this.mainActivity = mainActivity;
-        this.mRv = mRv;
-        this.mContents = mContents;
+    public NewsSummaryListRvAdapter(MainActivity mainActivity, NewsSummaryListRecyclerView mRv, List<NewsSummary> mContents) {
+        this(mainActivity, mRv, mContents, null);
     }
 
-    public NewsSummaryListRvAdapter(MainActivity mainActivity, RecyclerView mRv, List<NewsSummary> mContents, View headerView) {
+    public NewsSummaryListRvAdapter(MainActivity mainActivity, NewsSummaryListRecyclerView mRv, List<NewsSummary> mContents, View headerView) {
         this.mainActivity = mainActivity;
         this.mRv = mRv;
         this.mContents = mContents;
         this.mHeaderView = headerView;
+        //setOnVisibleItemMoveToTopListener
+        //限定此类中所定义接口的使用条件
+        mRv.setVisibleItemMoveToTopListener((pos) -> {
+            int realPos = getRealPosition(pos);
+            if (mHeaderView == null) {
+                if (onTopViewPagerMoveToTopListener != null)
+                    onItemMoveToTopListener.itemMoveToTop(realPos);
+            } else {
+                if (onTopViewPagerMoveToTopListener != null)
+                    onTopViewPagerMoveToTopListener.topViewPagerMoveToTop();
+                if (onItemMoveToTopListener != null)
+                    if (realPos > -1)
+                        onItemMoveToTopListener.itemMoveToTop(realPos);
+            }
+        });
     }
 
     @NonNull
@@ -137,7 +151,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         notifyItemRangeInserted(positionStart + startOffset, itemCount);
     }
 
-    public int getRealPosition(int position) {
+    private int getRealPosition(int position) {
         if (mHeaderView == null) {
             return position;
         } else {
@@ -145,6 +159,43 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     }
 
+    //定义接口回调
+
+    //监听轮播图移动到顶部时触发事件（即当轮播图成为RecyclerView中第一个可视视图时触发事件）
+    @FunctionalInterface
+    public interface OnTopViewPagerMoveToTopListener {
+        void topViewPagerMoveToTop();
+    }
+
+    //监听其他某个位置的Item移动到顶部时触发事件（即当其他某个位置的Item成为RecyclerView中第一个可视视图时触发事件）
+    @FunctionalInterface
+    public interface OnItemMoveToTopListener {
+        void itemMoveToTop(int pos);
+    }
+
+    private OnTopViewPagerMoveToTopListener onTopViewPagerMoveToTopListener = null;
+
+    private OnItemMoveToTopListener onItemMoveToTopListener = null;
+
+//    public OnTopViewPagerMoveToTopListener getOnTopViewPagerMoveToTopListener() {
+//        return onTopViewPagerMoveToTopListener;
+//    }
+
+    public void setOnTopViewPagerMoveToTopListener(OnTopViewPagerMoveToTopListener onTopViewPagerMoveToTopListener) {
+        this.onTopViewPagerMoveToTopListener = onTopViewPagerMoveToTopListener;
+    }
+
+//    public OnItemMoveToTopListener getOnItemMoveToTopListener() {
+//        return onItemMoveToTopListener;
+//    }
+
+    public void setOnItemMoveToTopListener(OnItemMoveToTopListener onItemMoveToTopListener) {
+        this.onItemMoveToTopListener = onItemMoveToTopListener;
+    }
+
+    //ViewHolder
+
+    //普通item
     class NewsSummaryViewHolder extends RecyclerView.ViewHolder {
 
         private View itemView;
@@ -203,6 +254,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         }
     }
 
+    //顶部轮播图
     class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         private View itemView;

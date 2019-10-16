@@ -31,7 +31,7 @@
             xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/news_summary_rv_item_bg"
+            android:background="@drawable/ripple_bg"
             android:orientation="horizontal">
 
             <TextView

@@ -110,19 +110,23 @@ public class NewsSummariesHelper {
     }
 
     //更新新闻列表
-    public void update() {
+    //成功返回true，失败返回false
+    public boolean update() {
         //更新最新和头条新闻共用的Json
-        NewsSummariesUtil.updateTodayNewsSummariesJson();
-        //重置加载信息
-        isTodayNewsSummariesLoaded = false;
-        currentLoadedNewsSummariesDate = new Date();
-        currentLoadedNewsSummariesDateString = dateToString(currentLoadedNewsSummariesDate);
-        insertRangeStartPosition = 0;
-        loadedNewsSummaryNum = 0;
-        topNewsSummariesList.clear();
-        newsSummariesList.clear();
-        //获取头条和最新新闻列表
-        getNewsSummariesDayByDay();
+        if (NewsSummariesUtil.updateTodayNewsSummariesJson()) {
+            //重置加载信息
+            isTodayNewsSummariesLoaded = false;
+            currentLoadedNewsSummariesDate = new Date();
+            currentLoadedNewsSummariesDateString = dateToString(currentLoadedNewsSummariesDate);
+            insertRangeStartPosition = 0;
+            loadedNewsSummaryNum = 0;
+            topNewsSummariesList.clear();
+            newsSummariesList.clear();
+            //获取头条和最新新闻列表
+            getNewsSummariesDayByDay();
+            return true;
+        }
+        return false;
     }
 
     //更新视图接口

@@ -3,12 +3,13 @@ package com.sion.zhdaily.views.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.sion.zhdaily.views.activities.MainActivity;
 import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 public class NewsSummaryListRecyclerView extends RecyclerView {
 
@@ -48,11 +49,30 @@ public class NewsSummaryListRecyclerView extends RecyclerView {
 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
+                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) getLayoutManager();
+                if (visibleItemMoveToTopListener != null) {
+                    visibleItemMoveToTopListener.visibleItemMoveToTop(linearLayoutManager.findFirstVisibleItemPosition());
+                }
+
             }
         });
-
     }
 
+
+    //监听RecyclerView的Item滑动到RecyclerView顶部时触发事件（即当Item成为RecyclerView中第一个可视视图时触发事件）
+    @FunctionalInterface
+    public interface OnVisibleItemMoveToTopListener {
+        void visibleItemMoveToTop(int pos);
+    }
+
+    private OnVisibleItemMoveToTopListener visibleItemMoveToTopListener;
+
+//    public OnVisibleItemMoveToTopListener getVisibleItemMoveToTopListener() {
+//        return visibleItemMoveToTopListener;
+//    }
+
+    public void setVisibleItemMoveToTopListener(OnVisibleItemMoveToTopListener visibleItemMoveToTopListener) {
+        this.visibleItemMoveToTopListener = visibleItemMoveToTopListener;
+    }
 
 }

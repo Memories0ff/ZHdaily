@@ -59,8 +59,10 @@ public class NewsSummariesUtil {
     }
 
     //更新最新及头条新闻共用的Json（更新操作时要用，“获取所有最新和头条新闻简介”这两个方法无法更新最新和头条新闻共用的Json）
-    public static void updateTodayNewsSummariesJson() {
+    //加载失败返回false，成功返回true
+    public static boolean updateTodayNewsSummariesJson() {
         todayNewsSummariesJson = getTodayNewsSummariesJson();
+        return todayNewsSummariesJson != null;
     }
 
     //获取以前某天前一天的多个新闻json
