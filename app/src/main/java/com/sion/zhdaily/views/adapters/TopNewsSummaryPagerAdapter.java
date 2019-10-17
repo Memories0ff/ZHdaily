@@ -2,16 +2,17 @@ package com.sion.zhdaily.views.adapters;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
+import com.sion.zhdaily.views.activities.NewsContentActivity;
 
 import java.util.List;
 import java.util.Timer;
@@ -67,7 +68,10 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(mContext, NewsContentActivity.class);
+                intent.putExtra("id", mContents.get(position).getId());
+                mContext.startActivity(intent);
             }
         });
         container.addView(view);

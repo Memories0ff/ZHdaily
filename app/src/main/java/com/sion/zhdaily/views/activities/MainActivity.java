@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -32,6 +34,8 @@ public class MainActivity extends Activity {
 
     Toolbar tb = null;
     TextView tbTvTitle = null;
+    ImageView tbIvMore = null;
+    PopupMenu popupMenu = null;
 
     DrawerLayout dl = null;
     LinearLayout llToIndexBtn = null;
@@ -51,10 +55,32 @@ public class MainActivity extends Activity {
         llToIndexBtn.setOnClickListener((v) -> update());
 
         //设置标题栏
+        //标题文字
         tb = findViewById(R.id.tb);
         tbTvTitle = findViewById(R.id.tv_tbTitle);
         tb.setNavigationOnClickListener((v) -> {
             dl.openDrawer(Gravity.LEFT);
+        });
+        //三个点按钮和PopupMenu
+        tbIvMore = findViewById(R.id.iv_tbMore);
+        popupMenu = new PopupMenu(this, tb, Gravity.END);
+        popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
+        //滑动按钮打开菜单
+        tbIvMore.setOnTouchListener(popupMenu.getDragToOpenListener());
+        popupMenu.setOnMenuItemClickListener((menuItem) -> {
+            switch (menuItem.getItemId()) {
+                case R.id.switchMode:
+                    Toast.makeText(this, "切换模式", Toast.LENGTH_SHORT).show();
+                    return true;
+                case R.id.setting:
+                    Toast.makeText(this, "设置选项", Toast.LENGTH_SHORT).show();
+                    return true;
+            }
+            return false;
+        });
+        tbIvMore.setOnClickListener((v) -> {
+            //弹出popupmenu
+            popupMenu.show();
         });
 
         //下拉刷新
@@ -132,4 +158,5 @@ public class MainActivity extends Activity {
         }).start();
 
     }
+
 }

@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ZHdaily</string>
+    <string name="title_activity_news_content">NewsContentActivity</string>
 </resources>

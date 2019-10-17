@@ -1,16 +1,17 @@
 package com.sion.zhdaily.views.adapters;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
+import com.sion.zhdaily.views.activities.NewsContentActivity;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
 import java.util.List;
@@ -102,7 +103,12 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             Glide.with(mainActivity).load(mContents.get(realPosition).getImageUrl()).into(imageView);
 
             View clickableView = newsSummaryViewHolder.getClickableView();
-            clickableView.setOnClickListener((v) -> Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show());
+            clickableView.setOnClickListener((v) -> {
+//                Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(mainActivity, NewsContentActivity.class);
+                intent.putExtra("id", mContents.get(realPosition).getId());
+                mainActivity.startActivity(intent);
+            });
             //某天的第一条新闻要显示日期
             if (mContents.get(realPosition).isFirstNewsSummary()) {
                 newsSummaryViewHolder.getTvNewsDate().setVisibility(View.VISIBLE);

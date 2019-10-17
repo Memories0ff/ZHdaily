@@ -21,15 +21,16 @@
         android:textSize="19dp" />
 
     <ImageView
-        android:id="@+id/tv_tbMore"
+        android:id="@+id/iv_tbMore"
         android:layout_width="30dp"
-        android:layout_height="match_parent"
+        android:layout_height="30dp"
         android:layout_gravity="end"
         android:layout_marginEnd="10dp"
+        android:background="@drawable/ripple_bg"
         android:src="@mipmap/more_vert_white_48" />
 
     <ImageView
-        android:id="@+id/tv_tbNotification"
+        android:id="@+id/iv_tbNotification"
         android:layout_width="30dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
