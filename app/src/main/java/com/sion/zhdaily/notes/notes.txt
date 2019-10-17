@@ -368,127 +368,65 @@
         Process 10007 terminated.
 
 
-
-<!--<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/dv_left"
-    android:layout_width="300dp"
-    android:layout_height="match_parent"
-    android:layout_gravity="start"
-    android:background="#FFFFFF"
-    android:orientation="vertical">
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center"
-        android:background="#00A2ED"
-        android:orientation="horizontal">
-
-        <com.shehuan.niv.NiceImageView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:src="@mipmap/account_avatar"
-            app:is_circle="true" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="5"
-            android:gravity="center_vertical"
-            android:text="请登录"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:layout_gravity="center"
-        android:background="#00A2ED"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:src="@mipmap/star_white" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="2"
-                android:gravity="center_vertical"
-                android:text="我的收藏"
-                android:textColor="#FFFFFF" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:src="@mipmap/download_white" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="2"
-                android:gravity="center_vertical"
-                android:text="离线下载"
-                android:textColor="#FFFFFF" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="45sp"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:src="@mipmap/home" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="5"
-            android:gravity="center_vertical"
-            android:text="首页"
-            android:textColor="#00A2ED"
-            android:textSize="20sp" />
-
-    </LinearLayout>
-
-</LinearLayout> -->
+            --------- beginning of crash
+        E/AndroidRuntime: FATAL EXCEPTION: main
+            Process: com.sion.zhdaily, PID: 8499
+            java.lang.IndexOutOfBoundsException: Inconsistency detected. Invalid view holder adapter positionViewHolder{a97444 position=11 id=-1, oldPos=4, pLpos:4 scrap [attachedScrap] tmpDetached no parent} com.sion.zhdaily.views.views.NewsSummaryListRecyclerView{6418853 VFED..... .F....ID 0,0-1080,1760 #7f08008b app:id/rv}, adapter:com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter@4a28590, layout:androidx.recyclerview.widget.LinearLayoutManager@b44ee89, context:com.sion.zhdaily.views.activities.MainActivity@3fd7e8e
+                at androidx.recyclerview.widget.RecyclerView$Recycler.validateViewHolderForOffsetPosition(RecyclerView.java:5715)
+                at androidx.recyclerview.widget.RecyclerView$Recycler.tryGetViewHolderForPositionByDeadline(RecyclerView.java:5898)
+                at androidx.recyclerview.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5858)
+                at androidx.recyclerview.widget.RecyclerView$Recycler.getViewForPosition(RecyclerView.java:5854)
+                at androidx.recyclerview.widget.LinearLayoutManager$LayoutState.next(LinearLayoutManager.java:2230)
+                at androidx.recyclerview.widget.LinearLayoutManager.layoutChunk(LinearLayoutManager.java:1557)
+                at androidx.recyclerview.widget.LinearLayoutManager.fill(LinearLayoutManager.java:1517)
+                at androidx.recyclerview.widget.LinearLayoutManager.onLayoutChildren(LinearLayoutManager.java:612)
+                at androidx.recyclerview.widget.RecyclerView.dispatchLayoutStep1(RecyclerView.java:3875)
+                at androidx.recyclerview.widget.RecyclerView.dispatchLayout(RecyclerView.java:3639)
+                at androidx.recyclerview.widget.RecyclerView.onLayout(RecyclerView.java:4194)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at androidx.swiperefreshlayout.widget.SwipeRefreshLayout.onLayout(SwipeRefreshLayout.java:625)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1741)
+                at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1585)
+                at android.widget.LinearLayout.onLayout(LinearLayout.java:1494)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at androidx.coordinatorlayout.widget.CoordinatorLayout.layoutChild(CoordinatorLayout.java:1183)
+                at androidx.coordinatorlayout.widget.CoordinatorLayout.onLayoutChild(CoordinatorLayout.java:870)
+                at androidx.coordinatorlayout.widget.CoordinatorLayout.onLayout(CoordinatorLayout.java:889)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at androidx.drawerlayout.widget.DrawerLayout.onLayout(DrawerLayout.java:1231)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at android.widget.FrameLayout.layoutChildren(FrameLayout.java:323)
+                at android.widget.FrameLayout.onLayout(FrameLayout.java:261)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at android.widget.LinearLayout.setChildFrame(LinearLayout.java:1741)
+                at android.widget.LinearLayout.layoutVertical(LinearLayout.java:1585)
+                at android.widget.LinearLayout.onLayout(LinearLayout.java:1494)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at android.widget.FrameLayout.layoutChildren(FrameLayout.java:323)
+                at android.widget.FrameLayout.onLayout(FrameLayout.java:261)
+                at com.android.internal.policy.DecorView.onLayout(DecorView.java:727)
+                at android.view.View.layout(View.java:17637)
+                at android.view.ViewGroup.layout(ViewGroup.java:5575)
+                at android.view.ViewRootImpl.performLayout(ViewRootImpl.java:2346)
+                at android.view.ViewRootImpl.performTraversals(ViewRootImpl.java:2068)
+                at android.view.ViewRootImpl.doTraversal(ViewRootImpl.java:1254)
+                at android.view.ViewRootImpl$TraversalRunnable.run(ViewRootImpl.java:6338)
+                at android.view.Choreographer$CallbackRecord.run(Choreographer.java:874)
+                at android.view.Choreographer.doCallbacks(Choreographer.java:686)
+                at android.view.Choreographer.doFrame(Choreographer.java:621)
+                at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:860)
+                at android.os.Handler.handleCallback(Handler.java:751)
+                at android.os.Handler.dispatchMessage(Handler.java:95)
+                at android.os.Looper.loop(Looper.java:154)
+                at android.app.ActivityThread.main(ActivityThread.java:6169)
+                at java.lang.reflect.Method.invoke(Native Method)
+                at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:891)
+                at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:781)
