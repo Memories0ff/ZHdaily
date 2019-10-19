@@ -11,16 +11,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.viewpager.widget.ViewPager;
+
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.presenters.NewsSummariesHelper;
 import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
 import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
-
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.viewpager.widget.ViewPager;
 
 
 public class MainActivity extends Activity {
@@ -65,8 +65,8 @@ public class MainActivity extends Activity {
         tbIvMore = findViewById(R.id.iv_tbMore);
         popupMenu = new PopupMenu(this, tb, Gravity.END);
         popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-        //滑动按钮打开菜单
-        tbIvMore.setOnTouchListener(popupMenu.getDragToOpenListener());
+//        //滑动按钮打开菜单
+//        tbIvMore.setOnTouchListener(popupMenu.getDragToOpenListener());
         popupMenu.setOnMenuItemClickListener((menuItem) -> {
             switch (menuItem.getItemId()) {
                 case R.id.switchMode:
