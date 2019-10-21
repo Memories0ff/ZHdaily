@@ -3,6 +3,7 @@ package com.sion.zhdaily.views.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
@@ -11,19 +12,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import androidx.core.widget.NestedScrollView;
-
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsContent;
 import com.sion.zhdaily.presenters.NewsContentHelper;
+import com.sion.zhdaily.views.views.NewsContentNestedScrollView;
+
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 public class NewsContentActivity extends Activity {
 
     NewsContentHelper helper = null;
     NewsContent content = null;
 
-    Toolbar tb = null;
+    Toolbar tbNewsContent = null;
 
     LinearLayout llCommentsBtn = null;
     TextView tvCommentNum = null;
@@ -31,10 +33,11 @@ public class NewsContentActivity extends Activity {
     LinearLayout llThumbBtn = null;
     TextView tvPopularityNum = null;
 
+    CoordinatorLayout clNewsContent = null;
     ImageView ivNewsContentTitlePic = null;
     TextView tvNewsContentTitle = null;
 
-    NestedScrollView nsvNewsContent = null;
+    NewsContentNestedScrollView nsvNewsContent = null;
     WebView wvNewsContent = null;
 
     @Override
@@ -42,8 +45,8 @@ public class NewsContentActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_content);
 
-        tb = findViewById(R.id.tb_newsContent);
-        tb.setNavigationOnClickListener((v) -> Toast.makeText(this, "返回", Toast.LENGTH_SHORT).show());
+        tbNewsContent = findViewById(R.id.tb_newsContent);
+        tbNewsContent.setNavigationOnClickListener((v) -> Toast.makeText(this, "返回", Toast.LENGTH_SHORT).show());
 
         llCommentsBtn = findViewById(R.id.ll_commentsBtn);
         tvCommentNum = findViewById(R.id.tv_commentsNum);
@@ -51,17 +54,31 @@ public class NewsContentActivity extends Activity {
         llThumbBtn = findViewById(R.id.ll_thumbBtn);
         tvPopularityNum = findViewById(R.id.tv_popularityNum);
 
+        clNewsContent = findViewById(R.id.cl_newsContent);
+        //新闻标题头部图片不相应触摸事件
+        clNewsContent.setOnTouchListener((v, motionEvent) -> true);
         ivNewsContentTitlePic = findViewById(R.id.iv_newsContentTitlePic);
         tvNewsContentTitle = findViewById(R.id.tv_newsContentTitle);
 
         nsvNewsContent = findViewById(R.id.nsv_newsContent);
-//        nsvNewsContent.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-//            System.out.println(String.format("%d | %d | %d | %d", scrollX, scrollY, oldScrollX, oldScrollY));
-//        });
-        nsvNewsContent.setOnTouchListener((v, event) -> {
-            System.out.println(String.format("%f | %f | %d | %d", v.getX(), v.getY(), v.getScrollX(), v.getScrollY()));
-            return false;
+        nsvNewsContent.setOnNewsContentNestedScrollViewTopMovedListener((oldY, currentY, dy, transRange) -> {
+            float alpha = (currentY - tbNewsContent.getHeight()) / transRange;
+            tbNewsContent.setAlpha(alpha);
         });
+        nsvNewsContent.setOnNewsContentNestedScrollSlidedListener((oldY, currentY, dy) -> {
+            if (dy < -15) {
+                if (tbNewsContent.getVisibility() != View.VISIBLE) {
+                    tbNewsContent.setVisibility(View.VISIBLE);
+                    tbNewsContent.setAlpha(1);
+                }
+            } else if (dy > 15) {
+                if (tbNewsContent.getVisibility() != View.GONE) {
+                    tbNewsContent.setVisibility(View.GONE);
+                }
+            }
+        });
+
+
         wvNewsContent = findViewById(R.id.wv_newsContent);
 
         Intent intent = getIntent();
