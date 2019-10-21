@@ -11,6 +11,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.core.widget.NestedScrollView;
+
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsContent;
@@ -32,6 +34,7 @@ public class NewsContentActivity extends Activity {
     ImageView ivNewsContentTitlePic = null;
     TextView tvNewsContentTitle = null;
 
+    NestedScrollView nsvNewsContent = null;
     WebView wvNewsContent = null;
 
     @Override
@@ -51,6 +54,14 @@ public class NewsContentActivity extends Activity {
         ivNewsContentTitlePic = findViewById(R.id.iv_newsContentTitlePic);
         tvNewsContentTitle = findViewById(R.id.tv_newsContentTitle);
 
+        nsvNewsContent = findViewById(R.id.nsv_newsContent);
+//        nsvNewsContent.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+//            System.out.println(String.format("%d | %d | %d | %d", scrollX, scrollY, oldScrollX, oldScrollY));
+//        });
+        nsvNewsContent.setOnTouchListener((v, event) -> {
+            System.out.println(String.format("%f | %f | %d | %d", v.getX(), v.getY(), v.getScrollX(), v.getScrollY()));
+            return false;
+        });
         wvNewsContent = findViewById(R.id.wv_newsContent);
 
         Intent intent = getIntent();

@@ -1,11 +1,9 @@
 <Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tb_newsContent"
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:background="#00A2ED"
-    android:navigationIcon="@mipmap/back_white_24"
-    app:layout_collapseMode="pin">
+    android:navigationIcon="@mipmap/back_white_24">
 
     <LinearLayout
         android:layout_width="match_parent"
