@@ -12,13 +12,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsContent;
 import com.sion.zhdaily.presenters.NewsContentHelper;
 import com.sion.zhdaily.views.views.NewsContentNestedScrollView;
-
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
 public class NewsContentActivity extends Activity {
 
@@ -55,29 +55,28 @@ public class NewsContentActivity extends Activity {
         tvPopularityNum = findViewById(R.id.tv_popularityNum);
 
         clNewsContent = findViewById(R.id.cl_newsContent);
-        //新闻标题头部图片不相应触摸事件
-        clNewsContent.setOnTouchListener((v, motionEvent) -> true);
         ivNewsContentTitlePic = findViewById(R.id.iv_newsContentTitlePic);
         tvNewsContentTitle = findViewById(R.id.tv_newsContentTitle);
 
         nsvNewsContent = findViewById(R.id.nsv_newsContent);
-        nsvNewsContent.setOnNewsContentNestedScrollViewTopMovedListener((oldY, currentY, dy, transRange) -> {
+        //
+        nsvNewsContent.setOnNewsContentNestedScrollViewTopMovedListener((currentY, transRange) -> {
             float alpha = (currentY - tbNewsContent.getHeight()) / transRange;
             tbNewsContent.setAlpha(alpha);
         });
         nsvNewsContent.setOnNewsContentNestedScrollSlidedListener((oldY, currentY, dy) -> {
+            //防抖动
             if (dy < -15) {
                 if (tbNewsContent.getVisibility() != View.VISIBLE) {
                     tbNewsContent.setVisibility(View.VISIBLE);
                     tbNewsContent.setAlpha(1);
                 }
-            } else if (dy > 15) {
+            } else if (dy > 0) {
                 if (tbNewsContent.getVisibility() != View.GONE) {
                     tbNewsContent.setVisibility(View.GONE);
                 }
             }
         });
-
 
         wvNewsContent = findViewById(R.id.wv_newsContent);
 
@@ -104,5 +103,18 @@ public class NewsContentActivity extends Activity {
                 wvNewsContent.loadDataWithBaseURL("file:///android_asset/", "<link rel=\"stylesheet\" type=\"text/css\" href=\"news_content.css\"" + " /> " + content.getHtmlContent(), "text/html", "UTF-8", null);
             });
         }).start();
+    }
+
+
+    @Override
+    protected void onResume() {
+        nsvNewsContent.startUiChangeThread();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        nsvNewsContent.stopUiChangeThread();
+        super.onPause();
     }
 }
