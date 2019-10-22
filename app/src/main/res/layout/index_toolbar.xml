@@ -20,19 +20,19 @@
         android:textColor="#FFFFFF"
         android:textSize="19dp" />
 
-    <ImageView
-        android:id="@+id/iv_tbMore"
-        android:layout_width="30dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:layout_marginEnd="10dp"
-        android:background="@drawable/ripple_bg"
-        android:src="@mipmap/more_vert_white_48" />
+    <!--    <ImageView-->
+    <!--        android:id="@+id/iv_tbMore"-->
+    <!--        android:layout_width="30dp"-->
+    <!--        android:layout_height="match_parent"-->
+    <!--        android:layout_gravity="end"-->
+    <!--        android:layout_marginEnd="10dp"-->
+    <!--        android:background="@drawable/ripple_bg"-->
+    <!--        android:src="@mipmap/more_vert_white_48" />-->
 
     <ImageView
         android:id="@+id/iv_tbNotification"
-        android:layout_width="30dp"
-        android:layout_height="match_parent"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
         android:layout_gravity="end"
         android:layout_marginEnd="15dp"
         android:src="@mipmap/notification_white" />

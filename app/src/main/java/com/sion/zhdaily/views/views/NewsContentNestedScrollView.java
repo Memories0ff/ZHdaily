@@ -3,11 +3,11 @@ package com.sion.zhdaily.views.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
+import com.sion.zhdaily.R;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
-
-import com.sion.zhdaily.R;
 
 public class NewsContentNestedScrollView extends NestedScrollView {
 
@@ -32,8 +32,8 @@ public class NewsContentNestedScrollView extends NestedScrollView {
         oldX = 0;
         oldY = transRange;
         setOnScrollChangeListener((OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            if (onNewsContentNestedScrollSlidedListener != null) {
-                onNewsContentNestedScrollSlidedListener.move(oldScrollY, scrollY, scrollY - oldScrollY);
+            if (onScrolledListener != null) {
+                onScrolledListener.move(oldScrollY, scrollY, scrollY - oldScrollY);
             }
         });
 
@@ -48,9 +48,9 @@ public class NewsContentNestedScrollView extends NestedScrollView {
                 if (!isUiChangeThreadAvailable) {
                     break;
                 }
-                if (onNewsContentNestedScrollViewTopMovedListener != null && getY() > 1) {
+                if (onTopMovedListener != null && getY() > 1) {
                     //?????????可能存在问题
-                    onNewsContentNestedScrollViewTopMovedListener.topMove(getY(), transRange);
+                    onTopMovedListener.topMove(getY(), transRange);
                 }
             }
         });
@@ -74,24 +74,24 @@ public class NewsContentNestedScrollView extends NestedScrollView {
 
     //接口
     @FunctionalInterface
-    public interface OnNewsContentNestedScrollViewTopMovedListener {
+    public interface OnTopMovedListener {
         void topMove(float currentY, float transRange);
     }
 
-    OnNewsContentNestedScrollViewTopMovedListener onNewsContentNestedScrollViewTopMovedListener = null;
+    OnTopMovedListener onTopMovedListener = null;
 
-    public interface OnNewsContentNestedScrollSlidedListener {
+    public interface OnScrolledListener {
         void move(float oldY, float currentY, float dy);
     }
 
-    OnNewsContentNestedScrollSlidedListener onNewsContentNestedScrollSlidedListener = null;
+    OnScrolledListener onScrolledListener = null;
 
-    public void setOnNewsContentNestedScrollViewTopMovedListener(OnNewsContentNestedScrollViewTopMovedListener onNewsContentNestedScrollViewTopMovedListener) {
-        this.onNewsContentNestedScrollViewTopMovedListener = onNewsContentNestedScrollViewTopMovedListener;
+    public void setOnTopMovedListener(OnTopMovedListener onTopMovedListener) {
+        this.onTopMovedListener = onTopMovedListener;
     }
 
-    public void setOnNewsContentNestedScrollSlidedListener(OnNewsContentNestedScrollSlidedListener onNewsContentNestedScrollSlidedListener) {
-        this.onNewsContentNestedScrollSlidedListener = onNewsContentNestedScrollSlidedListener;
+    public void setOnScrolledListener(OnScrolledListener onScrolledListener) {
+        this.onScrolledListener = onScrolledListener;
     }
 
 }

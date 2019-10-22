@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:background="#00A2ED"
+    android:minWidth="20dp"
     android:navigationIcon="@mipmap/back_white_24">
 
     <LinearLayout
@@ -11,20 +12,26 @@
         android:gravity="end|center_vertical"
         android:orientation="horizontal">
 
+        <!--分享-->
         <ImageView
             android:id="@+id/iv_newsContentShareBtn"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginEnd="30dp"
+            android:background="@drawable/ripple_bg"
+            android:clickable="true"
             android:src="@mipmap/share_white_48" />
-
+        <!--收藏-->
         <ImageView
             android:id="@+id/iv_newsContentCollectBtn"
             android:layout_width="25dp"
             android:layout_height="25dp"
             android:layout_marginEnd="20dp"
+            android:background="@drawable/ripple_bg"
+            android:clickable="true"
             android:src="@mipmap/star_white" />
 
+        <!--评论-->
         <LinearLayout
             android:id="@+id/ll_commentsBtn"
             android:layout_width="wrap_content"
@@ -48,6 +55,7 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
+        <!--点赞-->
         <LinearLayout
             android:id="@+id/ll_thumbBtn"
             android:layout_width="wrap_content"

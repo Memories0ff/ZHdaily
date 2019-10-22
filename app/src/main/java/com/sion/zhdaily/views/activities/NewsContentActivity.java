@@ -12,8 +12,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsContent;
@@ -22,21 +20,29 @@ import com.sion.zhdaily.views.views.NewsContentNestedScrollView;
 
 public class NewsContentActivity extends Activity {
 
+    //新闻内容处理帮助类
     NewsContentHelper helper = null;
+    //新闻内容对象
     NewsContent content = null;
 
+    //toolbar
     Toolbar tbNewsContent = null;
 
+    //评论按钮
     LinearLayout llCommentsBtn = null;
     TextView tvCommentNum = null;
 
+    //点赞按钮
     LinearLayout llThumbBtn = null;
     TextView tvPopularityNum = null;
 
-    CoordinatorLayout clNewsContent = null;
+    //appbar
+    //标题图片
     ImageView ivNewsContentTitlePic = null;
+    //标题文字
     TextView tvNewsContentTitle = null;
 
+    //新闻内容显示
     NewsContentNestedScrollView nsvNewsContent = null;
     WebView wvNewsContent = null;
 
@@ -46,7 +52,8 @@ public class NewsContentActivity extends Activity {
         setContentView(R.layout.activity_news_content);
 
         tbNewsContent = findViewById(R.id.tb_newsContent);
-        tbNewsContent.setNavigationOnClickListener((v) -> Toast.makeText(this, "返回", Toast.LENGTH_SHORT).show());
+        tbNewsContent.setNavigationOnClickListener((v) -> finish());
+//        tbNewsContent.inflateMenu(R.menu.news_content_toolbar_menu);
 
         llCommentsBtn = findViewById(R.id.ll_commentsBtn);
         tvCommentNum = findViewById(R.id.tv_commentsNum);
@@ -54,18 +61,19 @@ public class NewsContentActivity extends Activity {
         llThumbBtn = findViewById(R.id.ll_thumbBtn);
         tvPopularityNum = findViewById(R.id.tv_popularityNum);
 
-        clNewsContent = findViewById(R.id.cl_newsContent);
         ivNewsContentTitlePic = findViewById(R.id.iv_newsContentTitlePic);
         tvNewsContentTitle = findViewById(R.id.tv_newsContentTitle);
 
         nsvNewsContent = findViewById(R.id.nsv_newsContent);
         //
-        nsvNewsContent.setOnNewsContentNestedScrollViewTopMovedListener((currentY, transRange) -> {
+        nsvNewsContent.setOnTopMovedListener((currentY, transRange) -> {
+            //随NestedViewScroll中Top的位置确定toolbar的透明度，top越小toolbar越透明，到toolbar高度到位置时全透明
             float alpha = (currentY - tbNewsContent.getHeight()) / transRange;
             tbNewsContent.setAlpha(alpha);
         });
-        nsvNewsContent.setOnNewsContentNestedScrollSlidedListener((oldY, currentY, dy) -> {
-            //防抖动
+        nsvNewsContent.setOnScrolledListener((oldY, currentY, dy) -> {
+            //NestedScrollView向上滚动隐藏toolbar，向下滚动则显示
+            //最外if-else防抖动
             if (dy < -15) {
                 if (tbNewsContent.getVisibility() != View.VISIBLE) {
                     tbNewsContent.setVisibility(View.VISIBLE);
@@ -80,12 +88,15 @@ public class NewsContentActivity extends Activity {
 
         wvNewsContent = findViewById(R.id.wv_newsContent);
 
+        //获取从上个activity传来到数据
         Intent intent = getIntent();
         int id = intent.getIntExtra("id", 0);
         helper = new NewsContentHelper();
         new Thread(() -> {
+            //下载新闻内容等数据
             content = helper.getNewsContentById(id);
             runOnUiThread(() -> {
+                //显示这些数据
                 llCommentsBtn.setOnClickListener((v) -> Toast.makeText(this, "评论", Toast.LENGTH_SHORT).show());
                 tvCommentNum.setText("" + content.getComments());
 
@@ -105,7 +116,6 @@ public class NewsContentActivity extends Activity {
         }).start();
     }
 
-
     @Override
     protected void onResume() {
         nsvNewsContent.startUiChangeThread();
@@ -117,4 +127,10 @@ public class NewsContentActivity extends Activity {
         nsvNewsContent.stopUiChangeThread();
         super.onPause();
     }
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.news_content_toolbar_menu,menu);
+//        return true;
+//    }
 }
