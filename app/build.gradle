@@ -1,6 +1,16 @@
 apply plugin: 'com.android.application'
 
 android {
+//    sourceSets {
+//        main {
+//            res.srcDirs = [
+//                    'src/main/res/layout/activity_main',
+//                    'src/main/res/layout/activity_news_content',
+//                    'src/main/res/layout',
+//                    'src/main/res',
+//            ]
+//        }
+//    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "com.sion.zhdaily"

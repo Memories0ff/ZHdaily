@@ -4,6 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class NewsContent {
+    //id
+    private int id;
     //标题
     private String title;
     //HTML新闻内容
@@ -20,6 +22,14 @@ public class NewsContent {
     private int shortComments;
     //总评数
     private int comments;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getTitle() {
         return title;
@@ -88,6 +98,7 @@ public class NewsContent {
     public NewsContent(String json, String extraInfoJson) {
         try {
             JSONObject object = new JSONObject(json);
+            this.id = object.getInt("id");
             this.title = object.getString("title");
             this.htmlContent = object.getString("body");
             this.imageUrl = object.getString("image");

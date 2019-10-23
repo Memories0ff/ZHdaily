@@ -36,7 +36,16 @@ public class NewsContentNestedScrollView extends NestedScrollView {
                 onScrolledListener.move(oldScrollY, scrollY, scrollY - oldScrollY);
             }
         });
+    }
 
+    //用于下拉上滑时改变ToolBar的透明度
+    Thread uiChangeThread;
+    //是否执行线程内部的代码
+    boolean isUiChangeThreadAvailable = false;
+
+    //启动线程，activity执行onResume方法时用
+    public void startUiChangeThread() {
+        isUiChangeThreadAvailable = true;
         uiChangeThread = new Thread(() -> {
             while (true) {
                 try {
@@ -54,16 +63,6 @@ public class NewsContentNestedScrollView extends NestedScrollView {
                 }
             }
         });
-    }
-
-    //用于下拉时改变ToolBar的透明度
-    Thread uiChangeThread;
-    //是否执行线程内部的代码
-    boolean isUiChangeThreadAvailable = false;
-
-    //启动线程，activity执行onResume方法时用
-    public void startUiChangeThread() {
-        isUiChangeThreadAvailable = true;
         uiChangeThread.start();
     }
 

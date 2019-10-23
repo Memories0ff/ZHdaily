@@ -27,14 +27,16 @@ public class NewsContentActivity extends Activity {
 
     //toolbar
     Toolbar tbNewsContent = null;
-
     //评论按钮
     LinearLayout llCommentsBtn = null;
     TextView tvCommentNum = null;
-
     //点赞按钮
     LinearLayout llThumbBtn = null;
     TextView tvPopularityNum = null;
+    //分享按钮
+    ImageView ivShareBtn = null;
+    //收藏按钮
+    ImageView ivCollectBtn = null;
 
     //appbar
     //标题图片
@@ -53,7 +55,6 @@ public class NewsContentActivity extends Activity {
 
         tbNewsContent = findViewById(R.id.tb_newsContent);
         tbNewsContent.setNavigationOnClickListener((v) -> finish());
-//        tbNewsContent.inflateMenu(R.menu.news_content_toolbar_menu);
 
         llCommentsBtn = findViewById(R.id.ll_commentsBtn);
         tvCommentNum = findViewById(R.id.tv_commentsNum);
@@ -61,11 +62,14 @@ public class NewsContentActivity extends Activity {
         llThumbBtn = findViewById(R.id.ll_thumbBtn);
         tvPopularityNum = findViewById(R.id.tv_popularityNum);
 
+        ivShareBtn = findViewById(R.id.iv_newsContentShareBtn);
+        ivCollectBtn = findViewById(R.id.iv_newsContentCollectBtn);
+
         ivNewsContentTitlePic = findViewById(R.id.iv_newsContentTitlePic);
         tvNewsContentTitle = findViewById(R.id.tv_newsContentTitle);
 
         nsvNewsContent = findViewById(R.id.nsv_newsContent);
-        //
+        //设置NewsContentNestedScrollView中设置的接口
         nsvNewsContent.setOnTopMovedListener((currentY, transRange) -> {
             //随NestedViewScroll中Top的位置确定toolbar的透明度，top越小toolbar越透明，到toolbar高度到位置时全透明
             float alpha = (currentY - tbNewsContent.getHeight()) / transRange;
@@ -97,10 +101,7 @@ public class NewsContentActivity extends Activity {
             content = helper.getNewsContentById(id);
             runOnUiThread(() -> {
                 //显示这些数据
-                llCommentsBtn.setOnClickListener((v) -> Toast.makeText(this, "评论", Toast.LENGTH_SHORT).show());
                 tvCommentNum.setText("" + content.getComments());
-
-                llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
                 tvPopularityNum.setText("" + content.getPopularity());
 
                 Glide.with(this).load(content.getImageUrl()).into(ivNewsContentTitlePic);
@@ -112,6 +113,17 @@ public class NewsContentActivity extends Activity {
 //                wvNewsContent.loadData("<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/news_content.css\"" + " /> " + content.getHtmlContent(), "text/html;charset=UTF-8", null);
 //                wvNewsContent.loadData(content.getHtmlContent(), "text/html;charset=UTF-8", null);
                 wvNewsContent.loadDataWithBaseURL("file:///android_asset/", "<link rel=\"stylesheet\" type=\"text/css\" href=\"news_content.css\"" + " /> " + content.getHtmlContent(), "text/html", "UTF-8", null);
+
+                //等到数据加载完后设置点击事件
+                llCommentsBtn.setOnClickListener((v) -> {
+                    Intent commentsIntent = new Intent(NewsContentActivity.this, CommentsActivity.class);
+                    commentsIntent.putExtra("id", content.getId());
+                    startActivity(commentsIntent);
+                });
+                llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
+                ivShareBtn.setOnClickListener((v) -> Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show());
+                ivCollectBtn.setOnClickListener((v) -> Toast.makeText(this, "收藏", Toast.LENGTH_SHORT).show());
+
             });
         }).start();
     }
@@ -128,9 +140,4 @@ public class NewsContentActivity extends Activity {
         super.onPause();
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.news_content_toolbar_menu,menu);
-//        return true;
-//    }
 }
