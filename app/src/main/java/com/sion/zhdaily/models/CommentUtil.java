@@ -20,9 +20,10 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CommentUtil {
-    private static String getLongCommentsJson(int newsId) {
+    //beforeAuthorId为-1时加载最前面二十条评论，否则加载beforeAuthorId后面的二十条评论
+    private static String getLongCommentsJson(int newsId, int beforeAuthorId) {
         Request.Builder builder = new Request.Builder();
-        builder.url("https://news-at.zhihu.com/api/4/story/" + newsId + "/long-comments")
+        builder.url("https://www.zhihu.com/api/4/story/" + newsId + "/long-comments" + (beforeAuthorId == -1 ? "" : ("/before/" + beforeAuthorId)))
                 //添加Header防400 Bad Request
                 .addHeader("Host", "news-at.zhihu.com")
                 .addHeader("User-Agent", "DailyApi/4 (Linux; Android 5.1.1; OPPO R11 Build/OPPO /R11/R11/NMF26X/zh_CN) Google-HTTP-Java-Client/1.22.0 (gzip) Google-HTTP-Java-Client/1.22.0 (gzip)")
@@ -53,9 +54,9 @@ public class CommentUtil {
         return null;
     }
 
-    private static String getShortCommentsJson(int newsId) {
+    private static String getShortCommentsJson(int newsId, int beforeAuthorId) {
         Request.Builder builder = new Request.Builder();
-        builder.url("https://news-at.zhihu.com/api/4/story/" + newsId + "/short-comments")
+        builder.url("https://www.zhihu.com/api/4/story/" + newsId + "/short-comments" + (beforeAuthorId == -1 ? "" : ("/before/" + beforeAuthorId)))
                 //添加Header防400 Bad Request
                 .addHeader("Host", "news-at.zhihu.com")
                 .addHeader("User-Agent", "DailyApi/4 (Linux; Android 5.1.1; OPPO R11 Build/OPPO /R11/R11/NMF26X/zh_CN) Google-HTTP-Java-Client/1.22.0 (gzip) Google-HTTP-Java-Client/1.22.0 (gzip)")
@@ -87,20 +88,28 @@ public class CommentUtil {
     }
 
     public static List<Comment> getAllLongComments(int newsId) {
-
         List<Comment> longComments = new ArrayList<>();
-        String longCommentsJson = getLongCommentsJson(newsId);
-        //没有获取到Json，返回没有元素的集合
-        if (longCommentsJson == null) {
-            return longComments;
-        }
-        try {
-            JSONArray array = new JSONObject(longCommentsJson).getJSONArray("comments");
-            for (int i = 0; i < array.length(); i++) {
-                longComments.add(new Comment(array.getJSONObject(i).toString()));
+        boolean isFirstLoad = true;
+        while (true) {
+            String longCommentsJson = getLongCommentsJson(newsId, isFirstLoad ? -1 : longComments.get(longComments.size() - 1).getId());
+            isFirstLoad = false;
+            //没有获取到Json，返回没有元素的集合
+            if (longCommentsJson == null) {
+                return longComments;
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+            try {
+                JSONArray array = new JSONObject(longCommentsJson).getJSONArray("comments");
+                int size = array.length();
+                if (size == 0) {
+                    break;
+                }
+                for (int i = 0; i < size; i++) {
+                    longComments.add(new Comment(array.getJSONObject(i)));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                break;
+            }
         }
         return longComments;
     }
@@ -108,18 +117,27 @@ public class CommentUtil {
     public static List<Comment> getAllShortComments(int newsId) {
 
         List<Comment> shortComments = new ArrayList<>();
-        String longCommentsJson = getShortCommentsJson(newsId);
-        //没有获取到Json，返回没有元素的集合
-        if (longCommentsJson == null) {
-            return shortComments;
-        }
-        try {
-            JSONArray array = new JSONObject(longCommentsJson).getJSONArray("comments");
-            for (int i = 0; i < array.length(); i++) {
-                shortComments.add(new Comment(array.getJSONObject(i).toString()));
+        boolean isFirstLoad = true;
+        while (true) {
+            String longCommentsJson = getShortCommentsJson(newsId, isFirstLoad ? -1 : shortComments.get(shortComments.size() - 1).getId());
+            isFirstLoad = false;
+            //没有获取到Json，返回没有元素的集合
+            if (longCommentsJson == null) {
+                return shortComments;
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+            try {
+                JSONArray array = new JSONObject(longCommentsJson).getJSONArray("comments");
+                int size = array.length();
+                if (size == 0) {
+                    break;
+                }
+                for (int i = 0; i < size; i++) {
+                    shortComments.add(new Comment(array.getJSONObject(i)));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+                break;
+            }
         }
         return shortComments;
     }

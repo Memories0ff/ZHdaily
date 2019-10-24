@@ -113,7 +113,7 @@ public class NewsSummariesUtil {
         try {
             JSONArray array = new JSONObject(todayNewsSummariesJson).getJSONArray("stories");
             for (int i = 0; i < array.length(); i++) {
-                newsSummaries.add(new NewsSummary(array.getJSONObject(i).toString(), false));
+                newsSummaries.add(new NewsSummary(array.getJSONObject(i), false));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -135,7 +135,7 @@ public class NewsSummariesUtil {
         try {
             JSONArray array = new JSONObject(todayNewsSummariesJson).getJSONArray("top_stories");
             for (int i = 0; i < array.length(); i++) {
-                newsSummaries.add(new NewsSummary(array.getJSONObject(i).toString(), true));
+                newsSummaries.add(new NewsSummary(array.getJSONObject(i), true));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -154,7 +154,7 @@ public class NewsSummariesUtil {
         try {
             JSONArray array = new JSONObject(oldNewsSummariesJson).getJSONArray("stories");
             for (int i = 0; i < array.length(); i++) {
-                newsSummaries.add(new NewsSummary(array.getJSONObject(i).toString(), false));
+                newsSummaries.add(new NewsSummary(array.getJSONObject(i), false));
             }
         } catch (JSONException e) {
             e.printStackTrace();

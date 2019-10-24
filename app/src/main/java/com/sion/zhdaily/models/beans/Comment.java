@@ -115,9 +115,8 @@ public class Comment {
         this.errMsg = errMsg;
     }
 
-    public Comment(String json) {
+    public Comment(JSONObject object) {
         try {
-            JSONObject object = new JSONObject(json);
             this.author = object.getString("author");
             this.content = object.getString("content");
             this.avatarUrl = object.getString("avatar");

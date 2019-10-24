@@ -1,14 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
+//    def listSubFile = {
+//        def resFolder = 'src/main/res/layouts'
+//        def files = file(resFolder).listFiles()
+//        def folders = []
+//        files.each {
+//            item -> folders.add(item.absolutePath)
+//        }
+//        folders.add(file(resFolder).parentFile.absolutePath)
+//        return folders
+//    }
 //    sourceSets {
 //        main {
-//            res.srcDirs = [
-//                    'src/main/res/layout/activity_main',
-//                    'src/main/res/layout/activity_news_content',
-//                    'src/main/res/layout',
-//                    'src/main/res',
-//            ]
+//            res.srcDirs = listSubFile()
 //        }
 //    }
     compileSdkVersion 28
@@ -29,6 +34,17 @@ android {
     compileOptions {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
+    }
+    sourceSets {
+        main {
+            res.srcDirs = [
+                    'src/main/res/layouts/activity_main',
+                    'src/main/res/layouts/activity_content',
+                    'src/main/res/layouts/activity_comments',
+                    'src/main/res/layouts',
+                    'src/main/res',
+            ]
+        }
     }
 }
 

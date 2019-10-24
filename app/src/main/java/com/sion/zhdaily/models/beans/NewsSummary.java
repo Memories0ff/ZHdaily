@@ -78,9 +78,8 @@ public class NewsSummary {
         isFirstNewsSummary = firstNewsSummary;
     }
 
-    public NewsSummary(String json, boolean isTop) {
+    public NewsSummary(JSONObject object, boolean isTop) {
         try {
-            JSONObject object = new JSONObject(json);
             this.id = object.getInt("id");
             this.title = object.getString("title");
             this.newsContentUrl = object.getString("url");
