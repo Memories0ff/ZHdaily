@@ -3,17 +3,17 @@ package com.sion.zhdaily.views.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-import com.sion.zhdaily.R;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.widget.NestedScrollView;
+
+import com.sion.zhdaily.R;
 
 public class NewsContentNestedScrollView extends NestedScrollView {
 
     Context mContext;
 
-    public float transRange;
+    public float appbarHeight;
     float oldX, oldY;
     float currentX, currentY;
 
@@ -28,9 +28,9 @@ public class NewsContentNestedScrollView extends NestedScrollView {
     public NewsContentNestedScrollView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         this.mContext = context;
-        this.transRange = getResources().getDimensionPixelOffset(R.dimen.news_content_top_bar_height);
+        this.appbarHeight = getResources().getDimensionPixelOffset(R.dimen.news_content_appbar_height);
         oldX = 0;
-        oldY = transRange;
+        oldY = appbarHeight;
         setOnScrollChangeListener((OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
             if (onScrolledListener != null) {
                 onScrolledListener.move(oldScrollY, scrollY, scrollY - oldScrollY);
@@ -59,7 +59,7 @@ public class NewsContentNestedScrollView extends NestedScrollView {
                 }
                 if (onTopMovedListener != null && getY() > 1) {
                     //?????????可能存在问题
-                    onTopMovedListener.topMove(getY(), transRange);
+                    onTopMovedListener.topMove(getY());
                 }
             }
         });
@@ -74,7 +74,7 @@ public class NewsContentNestedScrollView extends NestedScrollView {
     //接口
     @FunctionalInterface
     public interface OnTopMovedListener {
-        void topMove(float currentY, float transRange);
+        void topMove(float currentY);
     }
 
     OnTopMovedListener onTopMovedListener = null;

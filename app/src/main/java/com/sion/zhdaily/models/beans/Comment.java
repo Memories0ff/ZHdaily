@@ -19,13 +19,13 @@ public class Comment {
     //所回复消息内容
     private String replyContent;
     //所回复消息状态
-    private int replyStatus = 0;
+    private int replyStatus;
     //所回复消息作者id
     private int replyAuthorId;
     //所回复消息作者
     private String replyAuthor;
     //错误代码
-    private int errMsg;
+    private String errMsg;
 
     public String getAuthor() {
         return author;
@@ -107,11 +107,11 @@ public class Comment {
         this.replyAuthor = replyAuthor;
     }
 
-    public int getErrMsg() {
+    public String getErrMsg() {
         return errMsg;
     }
 
-    public void setErrMsg(int errMsg) {
+    public void setErrMsg(String errMsg) {
         this.errMsg = errMsg;
     }
 
@@ -126,12 +126,13 @@ public class Comment {
 
             if (object.has("reply_to")) {
                 JSONObject replyObject = object.getJSONObject("reply_to");
-                this.replyContent = replyObject.getString("content");
                 this.replyStatus = replyObject.getInt("status");
-                this.replyAuthorId = replyObject.getInt("id");
-                this.replyAuthor = replyObject.getString("author");
-                if (replyStatus != 0) {
-                    this.errMsg = replyObject.getInt("err_msg");
+                if (replyStatus == 0) {
+                    this.replyContent = replyObject.getString("content");
+                    this.replyAuthorId = replyObject.getInt("id");
+                    this.replyAuthor = replyObject.getString("author");
+                } else {
+                    this.errMsg = replyObject.getString("error_msg");
                 }
             }
         } catch (JSONException e) {

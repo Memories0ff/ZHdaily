@@ -21,7 +21,7 @@ import okhttp3.Response;
 
 public class CommentUtil {
     //beforeAuthorId为-1时加载最前面二十条评论，否则加载beforeAuthorId后面的二十条评论
-    private static String getLongCommentsJson(int newsId, int beforeAuthorId) {
+    public static String getLongCommentsJson(int newsId, int beforeAuthorId) {
         Request.Builder builder = new Request.Builder();
         builder.url("https://www.zhihu.com/api/4/story/" + newsId + "/long-comments" + (beforeAuthorId == -1 ? "" : ("/before/" + beforeAuthorId)))
                 //添加Header防400 Bad Request
@@ -54,7 +54,7 @@ public class CommentUtil {
         return null;
     }
 
-    private static String getShortCommentsJson(int newsId, int beforeAuthorId) {
+    public static String getShortCommentsJson(int newsId, int beforeAuthorId) {
         Request.Builder builder = new Request.Builder();
         builder.url("https://www.zhihu.com/api/4/story/" + newsId + "/short-comments" + (beforeAuthorId == -1 ? "" : ("/before/" + beforeAuthorId)))
                 //添加Header防400 Bad Request
@@ -87,6 +87,31 @@ public class CommentUtil {
         return null;
     }
 
+    //每次获取最多20个短评
+    public static List<Comment> getShortCommentByStep(int newsId, int beforeAuthorId) {
+        List<Comment> shortComments = new ArrayList<>();
+
+        String longCommentsJson = getLongCommentsJson(newsId, beforeAuthorId);
+        //没有获取到Json，返回没有元素的集合
+        if (longCommentsJson == null) {
+            return shortComments;
+        }
+        try {
+            JSONArray array = new JSONObject(longCommentsJson).getJSONArray("comments");
+            int size = array.length();
+            if (size == 0) {
+                return shortComments;
+            }
+            for (int i = 0; i < size; i++) {
+                shortComments.add(new Comment(array.getJSONObject(i)));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return shortComments;
+    }
+
+    //获取全部长评
     public static List<Comment> getAllLongComments(int newsId) {
         List<Comment> longComments = new ArrayList<>();
         boolean isFirstLoad = true;
@@ -106,6 +131,10 @@ public class CommentUtil {
                 for (int i = 0; i < size; i++) {
                     longComments.add(new Comment(array.getJSONObject(i)));
                 }
+                //最后一次加载则退出
+                if (size < 20) {
+                    break;
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
                 break;
@@ -114,6 +143,7 @@ public class CommentUtil {
         return longComments;
     }
 
+    //获取全部短评
     public static List<Comment> getAllShortComments(int newsId) {
 
         List<Comment> shortComments = new ArrayList<>();
@@ -134,6 +164,10 @@ public class CommentUtil {
                 for (int i = 0; i < size; i++) {
                     shortComments.add(new Comment(array.getJSONObject(i)));
                 }
+                //最后一次加载则退出
+                if (size < 20) {
+                    break;
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
                 break;
@@ -141,4 +175,5 @@ public class CommentUtil {
         }
         return shortComments;
     }
+
 }

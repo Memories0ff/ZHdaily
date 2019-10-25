@@ -70,22 +70,29 @@ public class NewsContentActivity extends Activity {
 
         nsvNewsContent = findViewById(R.id.nsv_newsContent);
         //设置NewsContentNestedScrollView中设置的接口
-        nsvNewsContent.setOnTopMovedListener((currentY, transRange) -> {
-            //随NestedViewScroll中Top的位置确定toolbar的透明度，top越小toolbar越透明，到toolbar高度到位置时全透明
-            float alpha = (currentY - tbNewsContent.getHeight()) / transRange;
+        final float appbarHeight = getResources().getDimension(R.dimen.news_content_appbar_height);
+        nsvNewsContent.setOnTopMovedListener((currentY) -> {
+            //随NestedViewScroll中Top的位置确定toolbar的透明度，top越小toolbar越透明，到toolbar高度位置时全透明
+            float alpha = (currentY - tbNewsContent.getHeight()) / (appbarHeight - tbNewsContent.getHeight());
             tbNewsContent.setAlpha(alpha);
         });
         nsvNewsContent.setOnScrolledListener((oldY, currentY, dy) -> {
-            //NestedScrollView向上滚动隐藏toolbar，向下滚动则显示
-            //最外if-else防抖动
-            if (dy < -15) {
-                if (tbNewsContent.getVisibility() != View.VISIBLE) {
-                    tbNewsContent.setVisibility(View.VISIBLE);
-                    tbNewsContent.setAlpha(1);
-                }
-            } else if (dy > 0) {
-                if (tbNewsContent.getVisibility() != View.GONE) {
-                    tbNewsContent.setVisibility(View.GONE);
+            //防止在不出现Toolbar的情况下慢速上滑到显示图片时，不再显示Toolbar的问题
+            if (currentY < 1) {
+                tbNewsContent.setAlpha(0);
+                tbNewsContent.setVisibility(View.VISIBLE);
+            } else {
+                //NestedScrollView向上滚动隐藏toolbar，向下滚动则显示
+                //此层if-else防抖动
+                if (dy < -15) {
+                    if (tbNewsContent.getVisibility() != View.VISIBLE) {
+                        tbNewsContent.setVisibility(View.VISIBLE);
+                        tbNewsContent.setAlpha(1);
+                    }
+                } else if (dy > 0) {
+                    if (tbNewsContent.getVisibility() != View.GONE) {
+                        tbNewsContent.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -117,7 +124,10 @@ public class NewsContentActivity extends Activity {
                 //等到数据加载完后设置点击事件
                 llCommentsBtn.setOnClickListener((v) -> {
                     Intent commentsIntent = new Intent(NewsContentActivity.this, CommentsActivity.class);
-                    commentsIntent.putExtra("id", content.getId());
+                    commentsIntent.putExtra("newsId", content.getId());
+                    commentsIntent.putExtra("longCommentNum", content.getLongComments());
+                    commentsIntent.putExtra("shortCommentNum", content.getShortComments());
+                    commentsIntent.putExtra("commentNum", content.getLongComments() + content.getShortComments());
                     startActivity(commentsIntent);
                 });
                 llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
