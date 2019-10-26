@@ -91,13 +91,13 @@ public class CommentUtil {
     public static List<Comment> getShortCommentByStep(int newsId, int beforeAuthorId) {
         List<Comment> shortComments = new ArrayList<>();
 
-        String longCommentsJson = getLongCommentsJson(newsId, beforeAuthorId);
+        String shortCommentsJson = getShortCommentsJson(newsId, beforeAuthorId);
         //没有获取到Json，返回没有元素的集合
-        if (longCommentsJson == null) {
+        if (shortCommentsJson == null) {
             return shortComments;
         }
         try {
-            JSONArray array = new JSONObject(longCommentsJson).getJSONArray("comments");
+            JSONArray array = new JSONObject(shortCommentsJson).getJSONArray("comments");
             int size = array.length();
             if (size == 0) {
                 return shortComments;

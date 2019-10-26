@@ -3,12 +3,16 @@ package com.sion.zhdaily.presenters;
 import com.sion.zhdaily.models.CommentUtil;
 import com.sion.zhdaily.models.beans.Comment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CommentHelper {
 
-    public List<Comment> longComments = null;
-    public List<Comment> shortComments = null;
+    public List<Comment> longComments = new ArrayList<>();
+    public List<Comment> shortComments = new ArrayList<>();
+
+    //当前加载短评数
+    public int currentLoadedShortComments = 0;
 
     private boolean isShortCommentsLoadOver = false;
 
@@ -17,11 +21,13 @@ public class CommentHelper {
     }
 
     public void obtainAllLongComments(int newsId) {
-        longComments = CommentUtil.getAllLongComments(newsId);
+        longComments.clear();
+        longComments.addAll(CommentUtil.getAllLongComments(newsId));
     }
 
     public void obtainAllShortComments(int newsId) {
-        shortComments = CommentUtil.getAllShortComments(newsId);
+        shortComments.clear();
+        shortComments.addAll(CommentUtil.getAllShortComments(newsId));
     }
 
     //单次加载最多20条评论
@@ -30,6 +36,7 @@ public class CommentHelper {
             return;
         }
         List<Comment> comments = CommentUtil.getShortCommentByStep(newsId, shortComments.size() == 0 ? -1 : (shortComments.get(shortComments.size() - 1).getId()));
+        currentLoadedShortComments = comments.size();
         if (comments.size() < 20) {
             isShortCommentsLoadOver = true;
         }

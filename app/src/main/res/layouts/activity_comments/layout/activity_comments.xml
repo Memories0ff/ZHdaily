@@ -8,12 +8,9 @@
 
     <include layout="@layout/comment_page_toolbar" />
 
-    <TextView
-        android:id="@+id/info"
+    <com.sion.zhdaily.views.views.CommentRecyclerView
+        android:id="@+id/rv_comments"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
-        android:text="Loading..."
-        android:textSize="30sp" />
+        android:layout_height="match_parent" />
 
 </LinearLayout>
