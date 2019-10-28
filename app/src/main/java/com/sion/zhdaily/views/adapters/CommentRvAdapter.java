@@ -18,16 +18,20 @@ import com.sion.zhdaily.presenters.CommentHelper;
 import com.sion.zhdaily.views.activities.CommentsActivity;
 import com.sion.zhdaily.views.views.CommentRecyclerView;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 
 public class CommentRvAdapter extends RecyclerView.Adapter {
+
+    private static final int POSITION = 0;
+    private static final int STATEHOLDERS = 1;
 
     private CommentsActivity mActivity;
     private CommentRecyclerView mRv;
     private CommentHelper mHelper;
     private boolean isLoading = false;
-    private HashMap<String, StateHolder> stateHashMap = new HashMap<>(32);
+
+    private ArrayList<StateHolder> stateHolders = new ArrayList<>();
 
 
     public CommentRvAdapter(CommentsActivity mActivity, CommentRecyclerView mRv, CommentHelper mHelper) {
@@ -64,8 +68,6 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             comment = mHelper.shortComments.get(position - mHelper.longComments.size());
         }
 
-        StateHolder stateHolder = stateHashMap.get(comment.getId() + "/" + comment.getReplyAuthorId() + "/" + comment.getTime());
-
 
         CommentVH commentVH = (CommentVH) holder;
 
@@ -86,50 +88,44 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
         commentVH.getTvComment().setText(comment.getContent());
 
-        //????????????????????????????
+        //???????????????????????????????????????????????????????????????????????????
         TextView tvReplyComment = commentVH.getTvReplyComment();
         TextView tvOpenCloseBtn = commentVH.getTvOpenCloseBtn();
-        if (stateHolder == null) {
-            if (comment.getReplyAuthorId() == 0) {
-                tvOpenCloseBtn.setVisibility(View.GONE);
-                tvReplyComment.setVisibility(View.GONE);
-            } else {
-                tvOpenCloseBtn.setVisibility(View.VISIBLE);
-                tvOpenCloseBtn.setText("展开");
-                tvOpenCloseBtn.setOnClickListener((v) -> {
-                    //此代码块中的comment不应该是外面的comment
-                    StateHolder sh = stateHashMap.get(comment.getId() + "/" + comment.getReplyAuthorId() + "/" + comment.getTime());
-                    if (sh == null) {
-                        sh = new StateHolder();
-                        stateHashMap.put(comment.getId() + "/" + comment.getReplyAuthorId() + "/" + comment.getTime(), sh);
-                    }
-                    if (tvOpenCloseBtn.getText().equals("展开")) {
-                        sh.setExpanded(true);
-                        tvReplyComment.setLines(10);
-                        tvOpenCloseBtn.setText("收起");
-                    } else {
-                        sh.setExpanded(false);
-                        tvReplyComment.setLines(2);
-                        tvOpenCloseBtn.setText("展开");
-                    }
-                });
-                tvReplyComment.setVisibility(View.VISIBLE);
-                tvReplyComment.setLines(2);
-                tvReplyComment.setText(comment.getReplyContent());
-            }
+        stateHolders.add(new StateHolder());
+        if (comment.getReplyAuthorId() == 0) {
+            tvOpenCloseBtn.setVisibility(View.GONE);
+            tvReplyComment.setVisibility(View.GONE);
         } else {
             tvOpenCloseBtn.setVisibility(View.VISIBLE);
+            tvOpenCloseBtn.setTag(POSITION, position);
+            tvOpenCloseBtn.setTag(STATEHOLDERS, stateHolders);
+            tvOpenCloseBtn.setOnClickListener((v) -> {
+                int pos = (int) v.getTag(POSITION);
+                stateHolders = (ArrayList<StateHolder>) v.getTag(STATEHOLDERS);
+                if (tvOpenCloseBtn.getText().equals("展开")) {
+                    stateHolders.get(pos).setExpanded(true);
+                    tvReplyComment.setLines(10);
+                    tvOpenCloseBtn.setText("收起");
+                } else {
+                    stateHolders.get(pos).setExpanded(false);
+                    tvReplyComment.setLines(2);
+                    tvOpenCloseBtn.setText("展开");
+                }
+            });
+
             tvReplyComment.setVisibility(View.VISIBLE);
-            if (stateHolder.isExpanded()) {
-                tvReplyComment.setLines(10);
-                tvOpenCloseBtn.setText("收起");
-            } else {
-                tvReplyComment.setLines(2);
-                tvOpenCloseBtn.setText("展开");
-            }
             tvReplyComment.setText(comment.getReplyContent());
+
+            if (stateHolders.get(position).isExpanded()) {
+                tvOpenCloseBtn.setText("收起");
+                tvReplyComment.setLines(10);
+            } else {
+                tvOpenCloseBtn.setText("展开");
+                tvReplyComment.setLines(2);
+            }
         }
-        //????????????????????????????
+
+        //???????????????????????????????????????????????????????????????????????????
 
 
         commentVH.getTvTime().setText("" + comment.getTime());
@@ -206,7 +202,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
     }
 
     class StateHolder {
-        //authorId,replyAuthorId,time
+
         //保存控件状态
         private boolean isExpanded = false;
         private boolean isLiked = false;
@@ -226,5 +222,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         public void setLiked(boolean liked) {
             isLiked = liked;
         }
+
     }
+
 }
