@@ -23,9 +23,6 @@ import java.util.ArrayList;
 
 public class CommentRvAdapter extends RecyclerView.Adapter {
 
-    private static final int POSITION = 0;
-    private static final int STATEHOLDERS = 1;
-
     private CommentsActivity mActivity;
     private CommentRecyclerView mRv;
     private CommentHelper mHelper;
@@ -67,6 +64,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         } else {
             comment = mHelper.shortComments.get(position - mHelper.longComments.size());
         }
+        StateHolder stateHolder = position < stateHolders.size() ? stateHolders.get(position) : new StateHolder(stateHolders);
 
 
         CommentVH commentVH = (CommentVH) holder;
@@ -91,23 +89,20 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         //???????????????????????????????????????????????????????????????????????????
         TextView tvReplyComment = commentVH.getTvReplyComment();
         TextView tvOpenCloseBtn = commentVH.getTvOpenCloseBtn();
-        stateHolders.add(new StateHolder());
+        tvOpenCloseBtn.setTag(stateHolder);
         if (comment.getReplyAuthorId() == 0) {
             tvOpenCloseBtn.setVisibility(View.GONE);
             tvReplyComment.setVisibility(View.GONE);
         } else {
             tvOpenCloseBtn.setVisibility(View.VISIBLE);
-            tvOpenCloseBtn.setTag(POSITION, position);
-            tvOpenCloseBtn.setTag(STATEHOLDERS, stateHolders);
             tvOpenCloseBtn.setOnClickListener((v) -> {
-                int pos = (int) v.getTag(POSITION);
-                stateHolders = (ArrayList<StateHolder>) v.getTag(STATEHOLDERS);
+                StateHolder sh = (StateHolder) v.getTag();
                 if (tvOpenCloseBtn.getText().equals("展开")) {
-                    stateHolders.get(pos).setExpanded(true);
+                    sh.setExpanded(true);
                     tvReplyComment.setLines(10);
                     tvOpenCloseBtn.setText("收起");
                 } else {
-                    stateHolders.get(pos).setExpanded(false);
+                    sh.setExpanded(false);
                     tvReplyComment.setLines(2);
                     tvOpenCloseBtn.setText("展开");
                 }
@@ -207,6 +202,8 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         private boolean isExpanded = false;
         private boolean isLiked = false;
 
+        private ArrayList<StateHolder> stateHolders = new ArrayList<>();
+
         public boolean isExpanded() {
             return isExpanded;
         }
@@ -221,6 +218,11 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
         public void setLiked(boolean liked) {
             isLiked = liked;
+        }
+
+        public StateHolder(ArrayList<StateHolder> stateHolders) {
+            this.stateHolders = stateHolders;
+            this.stateHolders.add(this);
         }
 
     }
