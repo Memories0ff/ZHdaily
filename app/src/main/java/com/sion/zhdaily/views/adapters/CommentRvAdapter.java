@@ -1,5 +1,11 @@
 package com.sion.zhdaily.views.adapters;
 
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,14 +115,17 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             });
 
             tvReplyComment.setVisibility(View.VISIBLE);
-            tvReplyComment.setText(comment.getReplyContent());
+            SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
+            spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            tvReplyComment.setText(spannableString);
 
             if (stateHolders.get(position).isExpanded()) {
                 tvOpenCloseBtn.setText("收起");
                 tvReplyComment.setLines(10);
             } else {
                 tvOpenCloseBtn.setText("展开");
-                tvReplyComment.setLines(2);
+                tvReplyComment.setLines(1);
             }
         }
 

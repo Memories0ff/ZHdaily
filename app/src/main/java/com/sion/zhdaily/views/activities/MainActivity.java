@@ -1,6 +1,7 @@
 package com.sion.zhdaily.views.activities;
 
 import android.app.Activity;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -9,19 +10,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
-import com.sion.zhdaily.R;
-import com.sion.zhdaily.presenters.NewsSummariesHelper;
-import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
-import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
-import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
-
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import com.sion.zhdaily.R;
+import com.sion.zhdaily.broadcast_receiver.ConnectedReceiver;
+import com.sion.zhdaily.presenters.NewsSummariesHelper;
+import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
+import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
+import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
+
 
 public class MainActivity extends Activity {
+
+    ConnectedReceiver connectedReceiver = null;
 
     NewsSummaryListRecyclerView rv = null;
     NewsSummaryListRvAdapter rvAdapter = null;
@@ -169,4 +173,19 @@ public class MainActivity extends Activity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        connectedReceiver = new ConnectedReceiver();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        registerReceiver(connectedReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (connectedReceiver != null)
+            unregisterReceiver(connectedReceiver);
+    }
 }
