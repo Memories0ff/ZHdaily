@@ -1,7 +1,12 @@
 package com.sion.zhdaily.views.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -19,6 +24,16 @@ import com.sion.zhdaily.presenters.NewsContentHelper;
 import com.sion.zhdaily.views.views.NewsContentNestedScrollView;
 
 public class NewsContentActivity extends Activity {
+
+    //网络状态
+    private boolean isNetworkConnected = false;
+
+    public boolean isNetworkConnected() {
+        return isNetworkConnected;
+    }
+
+    ConnectivityManager connMgr = null;
+    NetworkCallbackImpl networkCallback = new NetworkCallbackImpl();
 
     //新闻内容处理帮助类
     NewsContentHelper helper = null;
@@ -52,6 +67,14 @@ public class NewsContentActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_news_content);
+
+        //网络状态
+        connMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        connMgr.registerNetworkCallback(new NetworkRequest.Builder().build(), networkCallback);
+        NetworkInfo info = connMgr.getActiveNetworkInfo();
+        if (info != null && info.isConnected()) {
+            isNetworkConnected = true;
+        }
 
         tbNewsContent = findViewById(R.id.tb_newsContent);
         tbNewsContent.setNavigationOnClickListener((v) -> finish());
@@ -123,12 +146,16 @@ public class NewsContentActivity extends Activity {
 
                 //等到数据加载完后设置点击事件
                 llCommentsBtn.setOnClickListener((v) -> {
-                    Intent commentsIntent = new Intent(NewsContentActivity.this, CommentsActivity.class);
-                    commentsIntent.putExtra("newsId", content.getId());
-                    commentsIntent.putExtra("longCommentNum", content.getLongComments());
-                    commentsIntent.putExtra("shortCommentNum", content.getShortComments());
-                    commentsIntent.putExtra("commentNum", content.getLongComments() + content.getShortComments());
-                    startActivity(commentsIntent);
+                    if (isNetworkConnected()) {
+                        Intent commentsIntent = new Intent(NewsContentActivity.this, CommentsActivity.class);
+                        commentsIntent.putExtra("newsId", content.getId());
+                        commentsIntent.putExtra("longCommentNum", content.getLongComments());
+                        commentsIntent.putExtra("shortCommentNum", content.getShortComments());
+                        commentsIntent.putExtra("commentNum", content.getLongComments() + content.getShortComments());
+                        startActivity(commentsIntent);
+                    } else {
+                        Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
+                    }
                 });
                 llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
                 ivShareBtn.setOnClickListener((v) -> Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show());
@@ -148,6 +175,22 @@ public class NewsContentActivity extends Activity {
     protected void onPause() {
         nsvNewsContent.stopUiChangeThread();
         super.onPause();
+    }
+
+    class NetworkCallbackImpl extends ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            super.onAvailable(network);
+            isNetworkConnected = true;
+//            Toast.makeText(NewsContentActivity.this, "网络已连接", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onLost(Network network) {
+            super.onLost(network);
+            isNetworkConnected = false;
+//            Toast.makeText(NewsContentActivity.this, "网络已断开", Toast.LENGTH_SHORT).show();
+        }
     }
 
 }

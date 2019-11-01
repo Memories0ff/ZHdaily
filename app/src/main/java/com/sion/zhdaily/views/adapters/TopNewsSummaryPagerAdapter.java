@@ -8,19 +8,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
+import com.sion.zhdaily.views.activities.MainActivity;
 import com.sion.zhdaily.views.activities.NewsContentActivity;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import androidx.annotation.NonNull;
-import androidx.viewpager.widget.PagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 
 public class TopNewsSummaryPagerAdapter extends PagerAdapter {
 
@@ -62,16 +65,24 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.rv_top_view_pager_item_view, container, false);
         ImageView imageView = view.findViewById(R.id.iv_topNewsPic);
-        Glide.with(mContext).load(mContents.get(position).getImageUrl()).into(imageView);
+        Glide.with(mContext)
+                .load(mContents.get(position).getImageUrl())
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(imageView);
         TextView textView = view.findViewById(R.id.tv_topNewsTitle);
         textView.setText(mContents.get(position).getTitle());
         view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 //                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(mContext, NewsContentActivity.class);
-                intent.putExtra("id", mContents.get(position).getId());
-                mContext.startActivity(intent);
+                if (((MainActivity) mContext).isNetworkConnected()) {
+                    Intent intent = new Intent(mContext, NewsContentActivity.class);
+                    intent.putExtra("id", mContents.get(position).getId());
+                    mContext.startActivity(intent);
+                } else {
+                    Toast.makeText(mContext, "网络不可用", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         container.addView(view);

@@ -6,8 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
@@ -15,9 +20,6 @@ import com.sion.zhdaily.views.activities.NewsContentActivity;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
 import java.util.List;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -100,14 +102,22 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             textViewNewsTitle.setText(mContents.get(realPosition).getTitle());
 
             ImageView imageView = newsSummaryViewHolder.getIvNewsTitlePic();
-            Glide.with(mainActivity).load(mContents.get(realPosition).getImageUrl()).into(imageView);
+            Glide.with(mainActivity)
+                    .load(mContents.get(realPosition).getImageUrl())
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(imageView);
 
             View clickableView = newsSummaryViewHolder.getClickableView();
             clickableView.setOnClickListener((v) -> {
 //                Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(mainActivity, NewsContentActivity.class);
-                intent.putExtra("id", mContents.get(realPosition).getId());
-                mainActivity.startActivity(intent);
+                if (mainActivity.isNetworkConnected()) {
+                    Intent intent = new Intent(mainActivity, NewsContentActivity.class);
+                    intent.putExtra("id", mContents.get(realPosition).getId());
+                    mainActivity.startActivity(intent);
+                } else {
+                    Toast.makeText(mainActivity, "网络不可用", Toast.LENGTH_SHORT).show();
+                }
             });
             //某天的第一条新闻要显示日期
             if (mContents.get(realPosition).isFirstNewsSummary()) {

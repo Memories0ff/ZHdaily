@@ -1,5 +1,10 @@
 package com.sion.zhdaily.views.activities;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -20,6 +25,16 @@ public class CommentsActivity extends AppCompatActivity {
     public int longCommentNum;
     public int shortCommentNum;
 
+    //网络状态
+    private boolean isNetworkConnected = false;
+
+    public boolean isNetworkConnected() {
+        return isNetworkConnected;
+    }
+
+    private ConnectivityManager connMgr = null;
+    private NetworkCallbackImpl networkCallback = new NetworkCallbackImpl();
+
     Toolbar tbComments = null;
     LinearLayout llWriteCommentBtn = null;
 
@@ -31,6 +46,14 @@ public class CommentsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comments);
+
+        //网络状态
+        connMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        connMgr.registerNetworkCallback(new NetworkRequest.Builder().build(), networkCallback);
+        NetworkInfo info = connMgr.getActiveNetworkInfo();
+        if (info != null && info.isConnected()) {
+            isNetworkConnected = true;
+        }
 
         newsId = getIntent().getIntExtra("newsId", 0);
         commentNum = getIntent().getIntExtra("commentNum", 0);
@@ -48,11 +71,28 @@ public class CommentsActivity extends AppCompatActivity {
         mCommentAdapter = new CommentRvAdapter(this, rvComments, mHelper);
         rvComments.setAdapter(mCommentAdapter);
 
-        new Thread(() -> {
-            mHelper.obtainAllLongComments(newsId);
-            mHelper.obtainShortCommentsByStep(newsId);
-            runOnUiThread(() -> mCommentAdapter.notifyDataSetChanged());
-        }).start();
+        if (isNetworkConnected()) {
+            new Thread(() -> {
+                mHelper.obtainAllLongComments(newsId);
+                mHelper.obtainShortCommentsByStep(newsId);
+                runOnUiThread(() -> mCommentAdapter.notifyDataSetChanged());
+            }).start();
+        } else {
+            Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    class NetworkCallbackImpl extends ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            super.onAvailable(network);
+            isNetworkConnected = true;
+        }
+
+        @Override
+        public void onLost(Network network) {
+            super.onLost(network);
+            isNetworkConnected = false;
+        }
     }
 }

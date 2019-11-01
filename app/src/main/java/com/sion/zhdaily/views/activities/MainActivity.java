@@ -1,7 +1,11 @@
 package com.sion.zhdaily.views.activities;
 
 import android.app.Activity;
-import android.content.IntentFilter;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -16,7 +20,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.broadcast_receiver.ConnectedReceiver;
 import com.sion.zhdaily.presenters.NewsSummariesHelper;
 import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
 import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
@@ -25,7 +28,9 @@ import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
 public class MainActivity extends Activity {
 
-    ConnectedReceiver connectedReceiver = null;
+    private boolean isNetworkConnected = false;
+    private ConnectivityManager connMgr = null;
+    private NetworkCallbackImpl networkCallback = new NetworkCallbackImpl();
 
     NewsSummaryListRecyclerView rv = null;
     NewsSummaryListRvAdapter rvAdapter = null;
@@ -46,10 +51,23 @@ public class MainActivity extends Activity {
 
     public NewsSummariesHelper helper = new NewsSummariesHelper();
 
+
+    public boolean isNetworkConnected() {
+        return isNetworkConnected;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //网络状态
+        connMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        connMgr.registerNetworkCallback(new NetworkRequest.Builder().build(), networkCallback);
+        NetworkInfo info = connMgr.getActiveNetworkInfo();
+        if (info != null && info.isConnected()) {
+            isNetworkConnected = true;
+        }
 
         //设置DrawerLayout
         dl = findViewById(R.id.dl);
@@ -123,16 +141,18 @@ public class MainActivity extends Activity {
         rvAdapter.setLoading(true);
 
         //从网络下载数据并显示
-        new Thread(() -> {
-            helper.getNewsSummariesDayByDay();
-            runOnUiThread(() -> {
-                pagerAdapter.notifyDataSetChanged();
-                pagerAdapter.setLoading(false);
-                pagerAdapter.startTimingPageRoll();
-                rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
-                rvAdapter.setLoading(false);
-            });
-        }).start();
+        if (isNetworkConnected) {
+            new Thread(() -> {
+                helper.getNewsSummariesDayByDay();
+                runOnUiThread(() -> {
+                    pagerAdapter.notifyDataSetChanged();
+                    pagerAdapter.setLoading(false);
+                    pagerAdapter.startTimingPageRoll();
+                    rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
+                    rvAdapter.setLoading(false);
+                });
+            }).start();
+        }
     }
 
     @Override
@@ -146,46 +166,55 @@ public class MainActivity extends Activity {
     }
 
     private void update() {
-        new Thread(() -> {
-            pagerAdapter.setLoading(true);
-            rvAdapter.setLoading(true);
-            if (helper.update()) {
-                runOnUiThread(() -> {
-                    pagerAdapter.notifyDataSetChanged();
-                    pagerAdapter.setLoading(false);
+        if (isNetworkConnected) {
+            new Thread(() -> {
+                pagerAdapter.setLoading(true);
+                rvAdapter.setLoading(true);
+                if (helper.update()) {
+                    runOnUiThread(() -> {
+                        pagerAdapter.notifyDataSetChanged();
+                        pagerAdapter.setLoading(false);
 //                    pagerAdapter.startTimingPageRoll();
-                    rvAdapter.notifyDataSetChanged();
+                        rvAdapter.notifyDataSetChanged();
+                        rvAdapter.setLoading(false);
+                        //轮播图设为初始位置
+                        vpTopNews.setCurrentItem(0);
+                        Toast.makeText(this, "更新完成", Toast.LENGTH_SHORT).show();
+                        if (dl.isDrawerOpen(Gravity.LEFT)) {
+                            dl.closeDrawer(Gravity.LEFT);
+                        }
+                    });
+                } else {
+                    pagerAdapter.setLoading(false);
                     rvAdapter.setLoading(false);
-                    //轮播图设为初始位置
-                    vpTopNews.setCurrentItem(0);
-                    Toast.makeText(this, "更新完成", Toast.LENGTH_SHORT).show();
-                    if (dl.isDrawerOpen(Gravity.LEFT)) {
-                        dl.closeDrawer(Gravity.LEFT);
-                    }
-                });
-            } else {
-                pagerAdapter.setLoading(false);
-                rvAdapter.setLoading(false);
-                runOnUiThread(() -> Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show());
 //                pagerAdapter.startTimingPageRoll();
-            }
-        }).start();
-
+                }
+            }).start();
+        } else {
+            Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        connectedReceiver = new ConnectedReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
-        registerReceiver(connectedReceiver, intentFilter);
+    protected void onDestroy() {
+        super.onDestroy();
+        connMgr.unregisterNetworkCallback(networkCallback);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (connectedReceiver != null)
-            unregisterReceiver(connectedReceiver);
+    class NetworkCallbackImpl extends ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            super.onAvailable(network);
+            isNetworkConnected = true;
+//            Toast.makeText(MainActivity.this, "网络已连接", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onLost(Network network) {
+            super.onLost(network);
+            isNetworkConnected = false;
+//            Toast.makeText(MainActivity.this, "网络已断开", Toast.LENGTH_SHORT).show();
+        }
     }
 }

@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.Comment;
 import com.sion.zhdaily.presenters.CommentHelper;
@@ -42,15 +43,19 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         this.mRv = mRv;
         this.mHelper = mHelper;
         this.mRv.setOnScrollToBottomListener(() -> {
-            if (!isLoading) {
-                isLoading = true;
-                new Thread(() -> {
-                    mHelper.obtainShortCommentsByStep(mActivity.newsId);
-                    mActivity.runOnUiThread(() -> {
-                        notifyItemRangeInserted(mHelper.longComments.size() + mHelper.shortComments.size(), mHelper.currentLoadedShortComments);
-                        isLoading = false;
-                    });
-                }).start();
+            if (mActivity.isNetworkConnected()) {
+                if (!isLoading) {
+                    isLoading = true;
+                    new Thread(() -> {
+                        mHelper.obtainShortCommentsByStep(mActivity.newsId);
+                        mActivity.runOnUiThread(() -> {
+                            notifyItemRangeInserted(mHelper.longComments.size() + mHelper.shortComments.size(), mHelper.currentLoadedShortComments);
+                            isLoading = false;
+                        });
+                    }).start();
+                }
+            } else {
+                Toast.makeText(mActivity, "网络不可用", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -77,7 +82,11 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
         commentVH.getLlPopCommentMenuBtn().setOnClickListener((v -> Toast.makeText(mActivity, "弹出菜单", Toast.LENGTH_SHORT).show()));
 
-        Glide.with(mActivity).load(comment.getAvatarUrl()).into(commentVH.getIvAuthorPic());
+        Glide.with(mActivity)
+                .load(comment.getAvatarUrl())
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(commentVH.getIvAuthorPic());
 
         commentVH.getTvAuthor().setText(comment.getAuthor());
 
