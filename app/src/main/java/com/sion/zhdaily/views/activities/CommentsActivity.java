@@ -82,6 +82,7 @@ public class CommentsActivity extends AppCompatActivity {
         }
     }
 
+
     class NetworkCallbackImpl extends ConnectivityManager.NetworkCallback {
         @Override
         public void onAvailable(Network network) {

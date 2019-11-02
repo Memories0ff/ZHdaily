@@ -155,15 +155,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        //左边DrawerLayout打开的情况下则关闭
-        if (dl.isDrawerOpen(Gravity.LEFT)) {
-            dl.closeDrawer(Gravity.LEFT);
-        } else {
-            super.onBackPressed();
-        }
-    }
 
     private void update() {
         if (isNetworkConnected) {
@@ -193,6 +184,34 @@ public class MainActivity extends Activity {
             }).start();
         } else {
             Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        //左边DrawerLayout打开的情况下则关闭
+        if (dl.isDrawerOpen(Gravity.LEFT)) {
+            dl.closeDrawer(Gravity.LEFT);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //开始轮播
+        if (pagerAdapter != null) {
+            pagerAdapter.startTimingPageRoll();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        //停止轮播
+        if (pagerAdapter != null) {
+            pagerAdapter.stopTimingPageRoll();
         }
     }
 

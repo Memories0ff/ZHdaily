@@ -432,3 +432,5 @@
                 at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:781)
 
 
+ViewPager内存泄露
+初始状态下拉继续加载

@@ -31,7 +31,9 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     List<NewsSummary> mContents = null;
     ViewPager vp = null;
 
-    private static Timer timer = new Timer();
+    //计时
+    private Timer timer = null;
+    private TimerTask timerTask = null;
 
     //是否正在加载内容
     boolean isLoading = false;
@@ -98,16 +100,34 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     }
 
     public void startTimingPageRoll() {
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                ((Activity) mContext).runOnUiThread(() -> {
-                    if (mContents.size() > 0 && !isLoading())
-                        //????????此时子线程执行update()，变量mContent改为0，会产生错误，但几率很小
-                        vp.setCurrentItem((vp.getCurrentItem() + 1) % mContents.size());
-                });
-            }
-        };
-        timer.schedule(timerTask, 5000, 5000);
+        if (timer == null) {
+            timer = new Timer();
+        }
+        if (timerTask == null) {
+            timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    ((Activity) mContext).runOnUiThread(() -> {
+                        if (mContents.size() > 0 && !isLoading()) {
+//                            Toast.makeText(mContext, "测试", Toast.LENGTH_SHORT).show();
+                            //????????此时子线程执行update()，变量mContent改为0，会产生错误，但几率很小
+                            vp.setCurrentItem((vp.getCurrentItem() + 1) % mContents.size());
+                        }
+                    });
+                }
+            };
+            timer.schedule(timerTask, 5000, 5000);
+        }
+    }
+
+    public void stopTimingPageRoll() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+        if (timerTask != null) {
+            timerTask.cancel();
+            timerTask = null;
+        }
     }
 }

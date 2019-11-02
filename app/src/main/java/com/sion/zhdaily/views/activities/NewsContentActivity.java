@@ -120,7 +120,9 @@ public class NewsContentActivity extends Activity {
             }
         });
 
-        wvNewsContent = findViewById(R.id.wv_newsContent);
+        wvNewsContent = new WebView(getApplicationContext());
+        nsvNewsContent.addView(wvNewsContent);
+
 
         //获取从上个activity传来到数据
         Intent intent = getIntent();
@@ -175,6 +177,29 @@ public class NewsContentActivity extends Activity {
     protected void onPause() {
         nsvNewsContent.stopUiChangeThread();
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        releaseWebView();
+        super.onDestroy();
+    }
+
+    private void releaseWebView() {
+        if (wvNewsContent != null) {
+            wvNewsContent.stopLoading();
+            // 退出时调用此方法，移除绑定的服务，否则某些特定系统会报错
+            wvNewsContent.getSettings().setJavaScriptEnabled(false);
+            wvNewsContent.clearHistory();
+            wvNewsContent.clearCache(true);
+            wvNewsContent.loadUrl("about:blank"); // clearView() should be changed to loadUrl("about:blank"), since clearView() is deprecated now
+            wvNewsContent.freeMemory();
+            wvNewsContent.pauseTimers();
+            wvNewsContent.clearView();
+            wvNewsContent.removeAllViews();
+            wvNewsContent.destroy();
+            wvNewsContent = null;
+        }
     }
 
     class NetworkCallbackImpl extends ConnectivityManager.NetworkCallback {
