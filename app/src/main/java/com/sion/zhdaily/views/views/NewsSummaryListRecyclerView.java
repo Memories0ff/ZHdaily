@@ -2,6 +2,7 @@ package com.sion.zhdaily.views.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -14,6 +15,10 @@ import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
 
 public class NewsSummaryListRecyclerView extends RecyclerView {
 
+    //按下y位置，放开y位置，按下减放开的差值
+    float downY, upY, moveDY;
+
+
     public NewsSummaryListRecyclerView(@NonNull Context context) {
         this(context, null);
     }
@@ -24,10 +29,17 @@ public class NewsSummaryListRecyclerView extends RecyclerView {
 
     public NewsSummaryListRecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
         addOnScrollListener(new OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
+
+                //解决下拉刷新过程中自动继续加载的问题，以及放开手指时才开始继续加载
+                if (moveDY >= 0 || newState != 0) {
+                    return;
+                }
+
                 //不再加载以及滚动到底部时进行加载操作
                 if (((MainActivity) recyclerView.getContext()).isNetworkConnected()) {
                     if (!((NewsSummaryListRvAdapter) getAdapter()).isLoading() && !recyclerView.canScrollVertically(1)) {
@@ -54,15 +66,27 @@ public class NewsSummaryListRecyclerView extends RecyclerView {
 
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                LinearLayoutManager linearLayoutManager = (LinearLayoutManager) getLayoutManager();
                 if (visibleItemMoveToTopListener != null) {
+                    LinearLayoutManager linearLayoutManager = (LinearLayoutManager) getLayoutManager();
                     visibleItemMoveToTopListener.visibleItemMoveToTop(linearLayoutManager.findFirstVisibleItemPosition());
                 }
-
             }
         });
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                downY = ev.getRawY();
+                break;
+            case MotionEvent.ACTION_UP:
+                upY = ev.getRawY();
+                moveDY = upY - downY;
+                break;
+        }
+        return super.dispatchTouchEvent(ev);
+    }
 
     //监听RecyclerView的Item滑动到RecyclerView顶部时触发事件（即当Item成为RecyclerView中第一个可视视图时触发事件）
     @FunctionalInterface

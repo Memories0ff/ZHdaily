@@ -129,6 +129,7 @@ public class MainActivity extends Activity {
         vpTopNews = headerView.findViewById(R.id.vp);
         pagerAdapter = new TopNewsSummaryPagerAdapter(this, vpTopNews, helper.topNewsSummariesList);
         vpTopNews.setAdapter(pagerAdapter);
+        vpTopNews.setOffscreenPageLimit(4);//?????????设为4个与刷新后切换回第一个轮播图冲突；少于4个则没问题，但存在内存泄露情况
         pagerAdapter.setLoading(true);
 
         //设置显示新闻的RecycyerView和对应adapter
@@ -163,13 +164,15 @@ public class MainActivity extends Activity {
                 rvAdapter.setLoading(true);
                 if (helper.update()) {
                     runOnUiThread(() -> {
+                        pagerAdapter.stopTimingPageRoll();
                         pagerAdapter.notifyDataSetChanged();
-                        pagerAdapter.setLoading(false);
-//                    pagerAdapter.startTimingPageRoll();
-                        rvAdapter.notifyDataSetChanged();
-                        rvAdapter.setLoading(false);
                         //轮播图设为初始位置
                         vpTopNews.setCurrentItem(0);
+                        pagerAdapter.startTimingPageRoll();
+                        pagerAdapter.setLoading(false);
+
+                        rvAdapter.notifyDataSetChanged();
+                        rvAdapter.setLoading(false);
                         Toast.makeText(this, "更新完成", Toast.LENGTH_SHORT).show();
                         if (dl.isDrawerOpen(Gravity.LEFT)) {
                             dl.closeDrawer(Gravity.LEFT);

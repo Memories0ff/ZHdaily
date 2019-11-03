@@ -18,6 +18,7 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsContent;
 import com.sion.zhdaily.presenters.NewsContentHelper;
@@ -136,7 +137,11 @@ public class NewsContentActivity extends Activity {
                 tvCommentNum.setText("" + content.getComments());
                 tvPopularityNum.setText("" + content.getPopularity());
 
-                Glide.with(this).load(content.getImageUrl()).into(ivNewsContentTitlePic);
+                Glide.with(this)
+                        .load(content.getImageUrl())
+                        .skipMemoryCache(false)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .into(ivNewsContentTitlePic);
                 tvNewsContentTitle.setText(content.getTitle());
 
 //                webView.getSettings().setJavaScriptEnabled(true);

@@ -432,5 +432,7 @@
                 at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:781)
 
 
-ViewPager内存泄露
-初始状态下拉继续加载
+ViewPager内存泄露√
+初始状态下拉刷新时还能继续加载√
+刷新后轮播图没有重置
+轮播图切换后重置计时

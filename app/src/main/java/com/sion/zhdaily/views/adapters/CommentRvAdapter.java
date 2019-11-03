@@ -84,7 +84,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
         Glide.with(mActivity)
                 .load(comment.getAvatarUrl())
-                .skipMemoryCache(true)
+                .skipMemoryCache(false)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(commentVH.getIvAuthorPic());
 

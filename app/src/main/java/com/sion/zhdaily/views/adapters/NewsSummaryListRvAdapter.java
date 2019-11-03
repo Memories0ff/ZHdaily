@@ -104,7 +104,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             ImageView imageView = newsSummaryViewHolder.getIvNewsTitlePic();
             Glide.with(mainActivity)
                     .load(mContents.get(realPosition).getImageUrl())
-                    .skipMemoryCache(true)
+                    .skipMemoryCache(false)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(imageView);
 

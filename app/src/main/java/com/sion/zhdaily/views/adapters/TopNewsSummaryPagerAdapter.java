@@ -36,7 +36,7 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     private TimerTask timerTask = null;
 
     //是否正在加载内容
-    boolean isLoading = false;
+    private boolean isLoading = false;
 
     public boolean isLoading() {
         return isLoading;
@@ -69,7 +69,7 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
         ImageView imageView = view.findViewById(R.id.iv_topNewsPic);
         Glide.with(mContext)
                 .load(mContents.get(position).getImageUrl())
-                .skipMemoryCache(true)
+                .skipMemoryCache(false)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(imageView);
         TextView textView = view.findViewById(R.id.tv_topNewsTitle);
