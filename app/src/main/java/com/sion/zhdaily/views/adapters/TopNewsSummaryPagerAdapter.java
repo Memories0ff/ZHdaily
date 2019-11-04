@@ -21,15 +21,17 @@ import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
 import com.sion.zhdaily.views.activities.NewsContentActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class TopNewsSummaryPagerAdapter extends PagerAdapter {
 
-    Context mContext = null;
-    List<NewsSummary> mContents = null;
-    ViewPager vp = null;
+    private Context mContext = null;
+    private List<NewsSummary> mContents = null;
+    private ViewPager vp = null;
+    private List<View> mViews = new ArrayList<>();
 
     //计时
     private Timer timer = null;
@@ -65,30 +67,32 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     @NonNull
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.rv_top_view_pager_item_view, container, false);
-        ImageView imageView = view.findViewById(R.id.iv_topNewsPic);
-        Glide.with(mContext)
-                .load(mContents.get(position).getImageUrl())
-                .skipMemoryCache(false)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(imageView);
-        TextView textView = view.findViewById(R.id.tv_topNewsTitle);
-        textView.setText(mContents.get(position).getTitle());
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
-                if (((MainActivity) mContext).isNetworkConnected()) {
-                    Intent intent = new Intent(mContext, NewsContentActivity.class);
-                    intent.putExtra("id", mContents.get(position).getId());
-                    mContext.startActivity(intent);
-                } else {
-                    Toast.makeText(mContext, "网络不可用", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-        container.addView(view);
-        return view;
+        container.addView(mViews.get(position));
+        return mViews.get(position);
+//        View view = LayoutInflater.from(mContext).inflate(R.layout.rv_top_view_pager_item_view, container, false);
+//        ImageView imageView = view.findViewById(R.id.iv_topNewsPic);
+//        Glide.with(mContext)
+//                .load(mContents.get(position).getImageUrl())
+//                .skipMemoryCache(false)
+//                .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                .into(imageView);
+//        TextView textView = view.findViewById(R.id.tv_topNewsTitle);
+//        textView.setText(mContents.get(position).getTitle());
+//        view.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+////                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
+//                if (((MainActivity) mContext).isNetworkConnected()) {
+//                    Intent intent = new Intent(mContext, NewsContentActivity.class);
+//                    intent.putExtra("id", mContents.get(position).getId());
+//                    mContext.startActivity(intent);
+//                } else {
+//                    Toast.makeText(mContext, "网络不可用", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
+//        container.addView(view);
+//        return view;
         //????????????????????√
     }
 
@@ -98,6 +102,40 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
 //        container.removeView(mViewList.get(position));
         container.removeView((View) object);
     }
+
+    @Override
+    public void notifyDataSetChanged() {
+        loadViews();
+        super.notifyDataSetChanged();
+    }
+
+    private void loadViews() {
+        mViews.clear();
+        for (int i = 0; i < mContents.size(); i++) {
+            View view = LayoutInflater.from(mContext).inflate(R.layout.rv_top_view_pager_item_view, vp, false);
+            ImageView imageView = view.findViewById(R.id.iv_topNewsPic);
+            Glide.with(mContext)
+                    .load(mContents.get(i).getImageUrl())
+                    .skipMemoryCache(false)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(imageView);
+            TextView textView = view.findViewById(R.id.tv_topNewsTitle);
+            textView.setText(mContents.get(i).getTitle());
+            final int _i = i;
+            view.setOnClickListener((v) -> {
+//                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
+                if (((MainActivity) mContext).isNetworkConnected()) {
+                    Intent intent = new Intent(mContext, NewsContentActivity.class);
+                    intent.putExtra("id", mContents.get(_i).getId());
+                    mContext.startActivity(intent);
+                } else {
+                    Toast.makeText(mContext, "网络不可用", Toast.LENGTH_SHORT).show();
+                }
+            });
+            mViews.add(view);
+        }
+    }
+
 
     public void startTimingPageRoll() {
         if (timer == null) {
@@ -129,5 +167,10 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
             timerTask.cancel();
             timerTask = null;
         }
+    }
+
+    public void resetTimingPageRoll() {
+        stopTimingPageRoll();
+        startTimingPageRoll();
     }
 }

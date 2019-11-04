@@ -129,7 +129,7 @@ public class MainActivity extends Activity {
         vpTopNews = headerView.findViewById(R.id.vp);
         pagerAdapter = new TopNewsSummaryPagerAdapter(this, vpTopNews, helper.topNewsSummariesList);
         vpTopNews.setAdapter(pagerAdapter);
-        vpTopNews.setOffscreenPageLimit(4);//?????????设为4个与刷新后切换回第一个轮播图冲突；少于4个则没问题，但存在内存泄露情况
+        vpTopNews.setOffscreenPageLimit(1);
         pagerAdapter.setLoading(true);
 
         //设置显示新闻的RecycyerView和对应adapter
