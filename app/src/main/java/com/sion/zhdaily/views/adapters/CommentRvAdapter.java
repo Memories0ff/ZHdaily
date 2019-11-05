@@ -102,50 +102,126 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         commentVH.getTvComment().setText(comment.getContent());
 
         //???????????????????????????????????????????????????????????????????????????
-        TextView tvReplyComment = commentVH.getTvReplyComment();
         TextView tvOpenCloseBtn = commentVH.getTvOpenCloseBtn();
-        if (comment.getReplyAuthorId() == 0) {
-            tvOpenCloseBtn.setVisibility(View.GONE);
-            tvReplyComment.setVisibility(View.GONE);
-        } else {
-            tvReplyComment.setVisibility(View.VISIBLE);
-            SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
-            spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-            spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-            tvReplyComment.setText(spannableString);
+        TextView tvReplyComment = commentVH.getTvReplyComment();
+        tvOpenCloseBtn.setOnClickListener((v) -> {
+            stateHolder.setNeedExpand(true);
+            TextView tv = (TextView) v;
+            if (tv.getText().equals("展开")) {
+                tv.setText("收起");
+                tvReplyComment.setLines(stateHolder.getRealReplyCommentLine());
+                stateHolder.setExpanded(true);
+                stateHolder.setDisplayedReplyCommentLine(stateHolder.getRealReplyCommentLine());
+            } else {
+                tv.setText("展开");
+                tvReplyComment.setLines(2);
+                stateHolder.setExpanded(false);
+                stateHolder.setDisplayedReplyCommentLine(2);
+            }
+        });
 
-            tvReplyComment.post(() -> {
-                int lineCount = tvReplyComment.getLineCount();
-                stateHolder.setReplyCommentLine(tvReplyComment.getLineCount());
-                if (lineCount <= 2) {
-                    tvReplyComment.setLines(lineCount);
-                    tvOpenCloseBtn.setVisibility(View.GONE);
-                } else {
-                    tvReplyComment.setLines(2);
-                    tvOpenCloseBtn.setVisibility(View.VISIBLE);
-                    tvOpenCloseBtn.setOnClickListener((v) -> {
-                        StateHolder sh = (StateHolder) v.getTag();
-                        if (tvOpenCloseBtn.getText().equals("展开")) {
-                            sh.setExpanded(true);
-                            tvReplyComment.setLines(lineCount);
-                            tvOpenCloseBtn.setText("收起");
-                        } else {
-                            sh.setExpanded(false);
-                            tvReplyComment.setLines(2);
-                            tvOpenCloseBtn.setText("展开");
-                        }
-                    });
-                    if (stateHolders.get(position).isExpanded()) {
-                        tvOpenCloseBtn.setText("收起");
+        if (stateHolder.isFirstCreated()) {
+            if (comment.getReplyAuthorId() == 0) {
+                tvOpenCloseBtn.setVisibility(View.GONE);
+                tvReplyComment.setVisibility(View.GONE);
+                stateHolder.setHasReply(false);
+                stateHolder.setExpanded(false);
+                stateHolder.setNeedExpand(false);
+                stateHolder.setDisplayedReplyCommentLine(0);
+                stateHolder.setRealReplyCommentLine(0);
+            } else {
+                tvReplyComment.setVisibility(View.VISIBLE);
+                SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
+                spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                tvReplyComment.setText(spannableString);
+                tvReplyComment.post(() -> {
+                    int lineCount = tvReplyComment.getLineCount();
+                    if (lineCount <= 2) {
                         tvReplyComment.setLines(lineCount);
+                        tvOpenCloseBtn.setVisibility(View.GONE);
+                        stateHolder.setDisplayedReplyCommentLine(lineCount);
+                        stateHolder.setNeedExpand(false);
+                    } else {
+                        tvReplyComment.setLines(2);
+                        tvOpenCloseBtn.setVisibility(View.VISIBLE);
+                        stateHolder.setDisplayedReplyCommentLine(2);
+                        stateHolder.setNeedExpand(true);
+                    }
+                    stateHolder.setRealReplyCommentLine(lineCount);
+                });
+                stateHolder.setHasReply(true);
+                stateHolder.setExpanded(false);
+            }
+        } else {
+            if (stateHolder.isHasReply()) {
+                tvReplyComment.setVisibility(View.VISIBLE);
+                SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
+                spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                tvReplyComment.setText(spannableString);
+                tvReplyComment.setLines(stateHolder.getDisplayedReplyCommentLine());
+                if (stateHolder.isNeedExpand()) {
+                    tvOpenCloseBtn.setVisibility(View.VISIBLE);
+                    if (stateHolder.isExpanded()) {
+                        tvOpenCloseBtn.setText("收起");
                     } else {
                         tvOpenCloseBtn.setText("展开");
-                        tvReplyComment.setLines(2);
                     }
+                } else {
+                    tvOpenCloseBtn.setVisibility(View.GONE);
                 }
-            });
+            } else {
+                tvOpenCloseBtn.setVisibility(View.GONE);
+                tvReplyComment.setVisibility(View.GONE);
+            }
         }
 
+
+//        if (comment.getReplyAuthorId() == 0) {
+//            tvOpenCloseBtn.setVisibility(View.GONE);
+//            tvReplyComment.setVisibility(View.GONE);
+//        } else {
+//            tvReplyComment.setVisibility(View.VISIBLE);
+//            SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
+//            spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+//            spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+//            tvReplyComment.setText(spannableString);
+//
+//            tvReplyComment.post(() -> {
+//                int lineCount = tvReplyComment.getLineCount();
+//                stateHolder.setDisplayedReplyCommentLine(tvReplyComment.getLineCount());
+//                if (lineCount <= 2) {
+//                    tvReplyComment.setLines(lineCount);
+//                    tvOpenCloseBtn.setVisibility(View.GONE);
+//                } else {
+//                    tvReplyComment.setLines(2);
+//                    tvOpenCloseBtn.setVisibility(View.VISIBLE);
+//                    tvOpenCloseBtn.setOnClickListener((v) -> {
+//                        StateHolder sh = (StateHolder) v.getTag();
+//                        if (tvOpenCloseBtn.getText().equals("展开")) {
+//                            sh.setExpanded(true);
+//                            tvReplyComment.setLines(lineCount);
+//                            tvOpenCloseBtn.setText("收起");
+//                        } else {
+//                            sh.setExpanded(false);
+//                            tvReplyComment.setLines(2);
+//                            tvOpenCloseBtn.setText("展开");
+//                        }
+//                    });
+//                    if (stateHolders.get(position).isExpanded()) {
+//                        tvOpenCloseBtn.setText("收起");
+//                        tvReplyComment.setLines(lineCount);
+//                    } else {
+//                        tvOpenCloseBtn.setText("展开");
+//                        tvReplyComment.setLines(2);
+//                    }
+//                }
+//            });
+//        }
+
+//        tvReplyComment.setTag(position);
+//        tvReplyComment.setTag(comment.getContent().hashCode(), mHelper);
         //???????????????????????????????????????????????????????????????????????????
 
 
@@ -232,13 +308,23 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
     class StateHolder {
 
         //保存控件状态
+        private boolean hasReply = false;
         private boolean isNeedExpand = false;
-        private int replyCommentLine = 0;
+        private int displayedReplyCommentLine = 0;
+        private int realReplyCommentLine = 0;
         private boolean isExpanded = false;
         private boolean isLiked = false;
         private boolean isFirstCreated = true;
 
         private ArrayList<StateHolder> stateHolders = new ArrayList<>();
+
+        public boolean isHasReply() {
+            return hasReply;
+        }
+
+        public void setHasReply(boolean hasReply) {
+            this.hasReply = hasReply;
+        }
 
         public boolean isNeedExpand() {
             return isNeedExpand;
@@ -248,12 +334,20 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             isNeedExpand = needExpand;
         }
 
-        public int getReplyCommentLine() {
-            return replyCommentLine;
+        public int getDisplayedReplyCommentLine() {
+            return displayedReplyCommentLine;
         }
 
-        public void setReplyCommentLine(int replyCommentLine) {
-            this.replyCommentLine = replyCommentLine;
+        public void setDisplayedReplyCommentLine(int displayedReplyCommentLine) {
+            this.displayedReplyCommentLine = displayedReplyCommentLine;
+        }
+
+        public int getRealReplyCommentLine() {
+            return realReplyCommentLine;
+        }
+
+        public void setRealReplyCommentLine(int realReplyCommentLine) {
+            this.realReplyCommentLine = realReplyCommentLine;
         }
 
         public boolean isExpanded() {
