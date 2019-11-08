@@ -109,12 +109,12 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             TextView tv = (TextView) v;
             if (tv.getText().equals("展开")) {
                 tv.setText("收起");
-                tvReplyComment.setLines(stateHolder.getRealReplyCommentLine());
+                tvReplyComment.setMaxLines(stateHolder.getRealReplyCommentLine());
                 stateHolder.setExpanded(true);
                 stateHolder.setDisplayedReplyCommentLine(stateHolder.getRealReplyCommentLine());
             } else {
                 tv.setText("展开");
-                tvReplyComment.setLines(2);
+                tvReplyComment.setMaxLines(2);
                 stateHolder.setExpanded(false);
                 stateHolder.setDisplayedReplyCommentLine(2);
             }
@@ -136,15 +136,20 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                 spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                 tvReplyComment.setText(spannableString);
                 tvReplyComment.post(() -> {
+                    //当maxLine<实际行数时，getLineCount()返回maxLine；
+                    //当maxLine>实际行数时，getLineCount()返回实际行数；
+                    //复用前TextView setMaxLine(2)导致复用后就算实际行数>2，getLineCount()方法也只返回maxLine的值：2
+                    //所以在onViewRecycled方法中调用setMaxLine(100)，使得复用后的TextView调用getLineCount()方法返回正确的行数
                     int lineCount = tvReplyComment.getLineCount();
                     if (lineCount <= 2) {
-                        tvReplyComment.setLines(lineCount);
+                        tvReplyComment.setMaxLines(lineCount);
                         tvOpenCloseBtn.setVisibility(View.GONE);
                         stateHolder.setDisplayedReplyCommentLine(lineCount);
                         stateHolder.setNeedExpand(false);
                     } else {
-                        tvReplyComment.setLines(2);
+                        tvReplyComment.setMaxLines(2);
                         tvOpenCloseBtn.setVisibility(View.VISIBLE);
+                        tvOpenCloseBtn.setText("展开");
                         stateHolder.setDisplayedReplyCommentLine(2);
                         stateHolder.setNeedExpand(true);
                     }
@@ -160,7 +165,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                 spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                 spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                 tvReplyComment.setText(spannableString);
-                tvReplyComment.setLines(stateHolder.getDisplayedReplyCommentLine());
+                tvReplyComment.setMaxLines(stateHolder.getDisplayedReplyCommentLine());
                 if (stateHolder.isNeedExpand()) {
                     tvOpenCloseBtn.setVisibility(View.VISIBLE);
                     if (stateHolder.isExpanded()) {
@@ -177,51 +182,6 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             }
         }
 
-
-//        if (comment.getReplyAuthorId() == 0) {
-//            tvOpenCloseBtn.setVisibility(View.GONE);
-//            tvReplyComment.setVisibility(View.GONE);
-//        } else {
-//            tvReplyComment.setVisibility(View.VISIBLE);
-//            SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
-//            spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-//            spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-//            tvReplyComment.setText(spannableString);
-//
-//            tvReplyComment.post(() -> {
-//                int lineCount = tvReplyComment.getLineCount();
-//                stateHolder.setDisplayedReplyCommentLine(tvReplyComment.getLineCount());
-//                if (lineCount <= 2) {
-//                    tvReplyComment.setLines(lineCount);
-//                    tvOpenCloseBtn.setVisibility(View.GONE);
-//                } else {
-//                    tvReplyComment.setLines(2);
-//                    tvOpenCloseBtn.setVisibility(View.VISIBLE);
-//                    tvOpenCloseBtn.setOnClickListener((v) -> {
-//                        StateHolder sh = (StateHolder) v.getTag();
-//                        if (tvOpenCloseBtn.getText().equals("展开")) {
-//                            sh.setExpanded(true);
-//                            tvReplyComment.setLines(lineCount);
-//                            tvOpenCloseBtn.setText("收起");
-//                        } else {
-//                            sh.setExpanded(false);
-//                            tvReplyComment.setLines(2);
-//                            tvOpenCloseBtn.setText("展开");
-//                        }
-//                    });
-//                    if (stateHolders.get(position).isExpanded()) {
-//                        tvOpenCloseBtn.setText("收起");
-//                        tvReplyComment.setLines(lineCount);
-//                    } else {
-//                        tvOpenCloseBtn.setText("展开");
-//                        tvReplyComment.setLines(2);
-//                    }
-//                }
-//            });
-//        }
-
-//        tvReplyComment.setTag(position);
-//        tvReplyComment.setTag(comment.getContent().hashCode(), mHelper);
         //???????????????????????????????????????????????????????????????????????????
 
 
@@ -233,6 +193,8 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
+        TextView tvReply = ((CommentVH) holder).getTvReplyComment();
+        tvReply.setMaxLines(100000);
         super.onViewRecycled(holder);
     }
 
