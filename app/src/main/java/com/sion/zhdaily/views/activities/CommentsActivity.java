@@ -11,6 +11,7 @@ import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.sion.zhdaily.R;
@@ -68,6 +69,7 @@ public class CommentsActivity extends AppCompatActivity {
 
         rvComments = findViewById(R.id.rv_comments);
         rvComments.setLayoutManager(new LinearLayoutManager(this));
+        rvComments.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         mCommentAdapter = new CommentRvAdapter(this, rvComments, mHelper);
         rvComments.setAdapter(mCommentAdapter);
 
