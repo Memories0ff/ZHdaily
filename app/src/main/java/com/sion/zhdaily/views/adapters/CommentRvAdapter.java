@@ -37,6 +37,10 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
     private ArrayList<StateHolder> stateHolders = new ArrayList<>();
 
+    enum ITEMTYPE {
+        COMMENT, LONG_GROUP_TITLE, SHORT_GROUP_TITLE, NONE_LONG_PLACEHOLDER
+    }
+
 
     public CommentRvAdapter(CommentsActivity mActivity, CommentRecyclerView mRv, CommentHelper mHelper) {
         this.mActivity = mActivity;
@@ -193,14 +197,40 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
-        TextView tvReply = ((CommentVH) holder).getTvReplyComment();
-        tvReply.setMaxLines(100000);
+        if (holder instanceof CommentVH) {
+            TextView tvReply = ((CommentVH) holder).getTvReplyComment();
+            tvReply.setMaxLines(100000);
+        }
         super.onViewRecycled(holder);
     }
 
     @Override
     public int getItemCount() {
-        return mHelper.longComments.size() + mHelper.shortComments.size();
+        return 2 + Math.max(mHelper.longComments.size(), 1) + mHelper.shortComments.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (position == 0) {
+            return ITEMTYPE.LONG_GROUP_TITLE.ordinal();
+        }
+        if (mHelper.longComments.isEmpty()) {
+            if (position == 1) {
+                return ITEMTYPE.NONE_LONG_PLACEHOLDER.ordinal();
+            } else if (position == 2) {
+                return ITEMTYPE.SHORT_GROUP_TITLE.ordinal();
+            } else {
+                return ITEMTYPE.COMMENT.ordinal();
+            }
+        } else {
+            if (position <= mHelper.longComments.size()) {
+                return ITEMTYPE.COMMENT.ordinal();
+            } else if (position == mHelper.longComments.size() + 1) {
+                return ITEMTYPE.SHORT_GROUP_TITLE.ordinal();
+            } else {
+                return ITEMTYPE.COMMENT.ordinal();
+            }
+        }
     }
 
     class CommentVH extends RecyclerView.ViewHolder {
@@ -264,6 +294,53 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             this.tvReplyComment = itemView.findViewById(R.id.tv_ReplyComment);
             this.tvTime = itemView.findViewById(R.id.tv_time);
             this.tvOpenCloseBtn = itemView.findViewById(R.id.tv_openCloseBtn);
+        }
+    }
+
+    class LongGroupTitleVH extends RecyclerView.ViewHolder {
+
+        private TextView tvLongCommentGroupTitle = null;
+
+        public TextView getTvLongCommentGroupTitle() {
+            return tvLongCommentGroupTitle;
+        }
+
+        public LongGroupTitleVH(@NonNull View itemView) {
+            super(itemView);
+            tvLongCommentGroupTitle = itemView.findViewById(R.id.tv_longCommentGroupTitle);
+        }
+    }
+
+    class ShortGroupTitleVH extends RecyclerView.ViewHolder {
+
+        private LinearLayout llExpandBtn = null;
+        private TextView tvShortCommentGroupTitle = null;
+        private ImageView ivExpandingPic = null;
+
+        public LinearLayout getLlExpandBtn() {
+            return llExpandBtn;
+        }
+
+        public TextView getTvShortCommentGroupTitle() {
+            return tvShortCommentGroupTitle;
+        }
+
+        public ImageView getIvExpandingPic() {
+            return ivExpandingPic;
+        }
+
+        public ShortGroupTitleVH(@NonNull View itemView) {
+            super(itemView);
+            llExpandBtn = itemView.findViewById(R.id.ll_expandBtn);
+            tvShortCommentGroupTitle = itemView.findViewById(R.id.tv_shortCommentGroupTitle);
+            ivExpandingPic = itemView.findViewById(R.id.iv_expandingPic);
+        }
+    }
+
+    class NoneLongPlaceHolderVH extends RecyclerView.ViewHolder {
+
+        public NoneLongPlaceHolderVH(@NonNull View itemView) {
+            super(itemView);
         }
     }
 
