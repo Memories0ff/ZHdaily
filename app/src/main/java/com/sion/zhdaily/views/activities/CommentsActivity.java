@@ -1,5 +1,6 @@
 package com.sion.zhdaily.views.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.Network;
@@ -36,10 +37,13 @@ public class CommentsActivity extends AppCompatActivity {
     private ConnectivityManager connMgr = null;
     private NetworkCallbackImpl networkCallback = new NetworkCallbackImpl();
 
+    //加载等待Dialog
+    ProgressDialog pdLoading = null;
+
     Toolbar tbComments = null;
     LinearLayout llWriteCommentBtn = null;
 
-    CommentHelper mHelper = new CommentHelper();
+    CommentHelper mHelper;
     CommentRecyclerView rvComments = null;
     CommentRvAdapter mCommentAdapter = null;
 
@@ -61,6 +65,8 @@ public class CommentsActivity extends AppCompatActivity {
         longCommentNum = getIntent().getIntExtra("longCommentNum", 0);
         shortCommentNum = getIntent().getIntExtra("shortCommentNum", 0);
 
+        mHelper = new CommentHelper(newsId, longCommentNum, shortCommentNum);
+
         tbComments = findViewById(R.id.tb_comments);
         tbComments.setTitle(commentNum + "条点评");
         tbComments.setNavigationOnClickListener((v) -> finish());
@@ -73,11 +79,21 @@ public class CommentsActivity extends AppCompatActivity {
         mCommentAdapter = new CommentRvAdapter(this, rvComments, mHelper);
         rvComments.setAdapter(mCommentAdapter);
 
+        pdLoading = new ProgressDialog(this);
+        pdLoading.setIndeterminate(true);
+        pdLoading.setMessage("正在加载");
+        pdLoading.setCancelable(false);
+        pdLoading.show();
+
         if (isNetworkConnected()) {
             new Thread(() -> {
-                mHelper.obtainAllLongComments(newsId);
-                mHelper.obtainShortCommentsByStep(newsId);
-                runOnUiThread(() -> mCommentAdapter.notifyDataSetChanged());
+                mHelper.obtainAllLongComments();
+//                mHelper.obtainShortCommentsByStep(newsId);
+                runOnUiThread(() -> {
+//                    mCommentAdapter.notifyDataSetChanged();
+                    mCommentAdapter.notifyCommentSetChanged();
+                    pdLoading.dismiss();
+                });
             }).start();
         } else {
             Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();

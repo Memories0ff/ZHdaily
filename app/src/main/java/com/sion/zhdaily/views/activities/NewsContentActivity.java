@@ -147,7 +147,7 @@ public class NewsContentActivity extends Activity {
 //                webView.getSettings().setJavaScriptEnabled(true);
                 wvNewsContent.getSettings().setBlockNetworkImage(false);
                 wvNewsContent.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-//                wvNewsContent.loadData("<link rel=\"stylesheet\" type=\"text/css\" href=\"file:///android_asset/news_content.css\"" + " /> " + content.getHtmlContent(), "text/html;charset=UTF-8", null);
+//                wvNewsContent.loadData("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + content.getCssUrl() + "\" /> " + content.getHtmlContent(), "text/html;charset=UTF-8", null);
 //                wvNewsContent.loadData(content.getHtmlContent(), "text/html;charset=UTF-8", null);
                 wvNewsContent.loadDataWithBaseURL("file:///android_asset/", "<link rel=\"stylesheet\" type=\"text/css\" href=\"news_content.css\"" + " /> " + content.getHtmlContent(), "text/html", "UTF-8", null);
 

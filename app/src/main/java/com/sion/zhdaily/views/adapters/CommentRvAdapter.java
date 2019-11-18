@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +35,9 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
     private CommentRecyclerView mRv;
     private CommentHelper mHelper;
     private boolean isLoading = false;
+    private boolean isShortsCommentsExpanded = false;
+    //用于在首次加载过程中隐藏没有长评的提示图片，加载后如果没有长评则显示图片
+    private NoneLongPlaceHolderVH noneLongPlaceHolderVH;
 
     private ArrayList<StateHolder> stateHolders = new ArrayList<>();
 
@@ -48,12 +52,12 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         this.mHelper = mHelper;
         this.mRv.setOnScrollToBottomListener(() -> {
             if (mActivity.isNetworkConnected()) {
-                if (!isLoading) {
+                if (isShortsCommentsExpanded && !isLoading) {
                     isLoading = true;
                     new Thread(() -> {
-                        mHelper.obtainShortCommentsByStep(mActivity.newsId);
+                        mHelper.obtainShortCommentsByStep();
                         mActivity.runOnUiThread(() -> {
-                            notifyItemRangeInserted(mHelper.longComments.size() + mHelper.shortComments.size(), mHelper.currentLoadedShortComments);
+                            notifyItemRangeInserted(2 + Math.max(1, mHelper.longComments.size()) + mHelper.shortComments.size(), mHelper.currentLoadedShortComments);
                             isLoading = false;
                         });
                     }).start();
@@ -67,132 +71,192 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mActivity).inflate(R.layout.rv_comment_item, parent, false);
-        return new CommentVH(view);
+        if (viewType == ITEMTYPE.COMMENT.ordinal()) {
+            View view = LayoutInflater.from(mActivity).inflate(R.layout.rv_comment_item, parent, false);
+            return new CommentVH(view);
+        } else if (viewType == ITEMTYPE.LONG_GROUP_TITLE.ordinal()) {
+            View view = LayoutInflater.from(mActivity).inflate(R.layout.rv_long_comment_group_title_item, parent, false);
+            return new LongGroupTitleVH(view);
+        } else if (viewType == ITEMTYPE.SHORT_GROUP_TITLE.ordinal()) {
+            View view = LayoutInflater.from(mActivity).inflate(R.layout.rv_short_comment_group_title_item, parent, false);
+            return new ShortGroupTitleVH(view);
+        } else {
+            View view = LayoutInflater.from(mActivity).inflate(R.layout.rv_none_long_placeholder_item, parent, false);
+            noneLongPlaceHolderVH = new NoneLongPlaceHolderVH(view);
+            return noneLongPlaceHolderVH;
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Comment comment;
-        if (position < mHelper.longComments.size()) {
-            comment = mHelper.longComments.get(position);
-        } else {
-            comment = mHelper.shortComments.get(position - mHelper.longComments.size());
-        }
-        StateHolder stateHolder = position < stateHolders.size() ? stateHolders.get(position) : new StateHolder(stateHolders);
+        if (getItemViewType(position) == ITEMTYPE.COMMENT.ordinal()) {
+            int realPos = getCommentPosition(position);
 
-
-        CommentVH commentVH = (CommentVH) holder;
-
-        commentVH.getLlPopCommentMenuBtn().setOnClickListener((v -> Toast.makeText(mActivity, "弹出菜单", Toast.LENGTH_SHORT).show()));
-
-        Glide.with(mActivity)
-                .load(comment.getAvatarUrl())
-                .skipMemoryCache(false)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(commentVH.getIvAuthorPic());
-
-        commentVH.getTvAuthor().setText(comment.getAuthor());
-
-        ImageView ivThumb = commentVH.getIvThumb();
-        if (stateHolder.isLiked()) {
-            ivThumb.setImageResource(R.mipmap.thumb_blue);
-        } else {
-            ivThumb.setImageResource(R.mipmap.thumb_gray);
-        }
-
-        commentVH.getTvPopularityNum().setText("" + comment.getLikes());
-
-        commentVH.getTvComment().setText(comment.getContent());
-
-        //???????????????????????????????????????????????????????????????????????????
-        TextView tvOpenCloseBtn = commentVH.getTvOpenCloseBtn();
-        TextView tvReplyComment = commentVH.getTvReplyComment();
-        tvOpenCloseBtn.setOnClickListener((v) -> {
-            stateHolder.setNeedExpand(true);
-            TextView tv = (TextView) v;
-            if (tv.getText().equals("展开")) {
-                tv.setText("收起");
-                tvReplyComment.setMaxLines(stateHolder.getRealReplyCommentLine());
-                stateHolder.setExpanded(true);
-                stateHolder.setDisplayedReplyCommentLine(stateHolder.getRealReplyCommentLine());
+            Comment comment;
+            if (realPos < mHelper.longComments.size()) {
+                comment = mHelper.longComments.get(realPos);
             } else {
-                tv.setText("展开");
-                tvReplyComment.setMaxLines(2);
-                stateHolder.setExpanded(false);
-                stateHolder.setDisplayedReplyCommentLine(2);
+                comment = mHelper.shortComments.get(realPos - mHelper.longComments.size());
             }
-        });
 
-        if (stateHolder.isFirstCreated()) {
-            if (comment.getReplyAuthorId() == 0) {
-                tvOpenCloseBtn.setVisibility(View.GONE);
-                tvReplyComment.setVisibility(View.GONE);
-                stateHolder.setHasReply(false);
-                stateHolder.setExpanded(false);
-                stateHolder.setNeedExpand(false);
-                stateHolder.setDisplayedReplyCommentLine(0);
-                stateHolder.setRealReplyCommentLine(0);
+            StateHolder stateHolder;
+            if (realPos < stateHolders.size()) {
+                stateHolder = stateHolders.get(realPos);
             } else {
-                tvReplyComment.setVisibility(View.VISIBLE);
-                SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
-                spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-                spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-                tvReplyComment.setText(spannableString);
-                tvReplyComment.post(() -> {
-                    //当maxLine<实际行数时，getLineCount()返回maxLine；
-                    //当maxLine>实际行数时，getLineCount()返回实际行数；
-                    //复用前TextView setMaxLine(2)导致复用后就算实际行数>2，getLineCount()方法也只返回maxLine的值：2
-                    //所以在onViewRecycled方法中调用setMaxLine(100)，使得复用后的TextView调用getLineCount()方法返回正确的行数
-                    int lineCount = tvReplyComment.getLineCount();
-                    if (lineCount <= 2) {
-                        tvReplyComment.setMaxLines(lineCount);
-                        tvOpenCloseBtn.setVisibility(View.GONE);
-                        stateHolder.setDisplayedReplyCommentLine(lineCount);
-                        stateHolder.setNeedExpand(false);
-                    } else {
-                        tvReplyComment.setMaxLines(2);
+                stateHolder = new StateHolder(stateHolders);
+            }
+
+
+            CommentVH commentVH = (CommentVH) holder;
+
+            commentVH.getLlPopCommentMenuBtn().setOnClickListener((v -> Toast.makeText(mActivity, "弹出菜单", Toast.LENGTH_SHORT).show()));
+
+            Glide.with(mActivity)
+                    .load(comment.getAvatarUrl())
+                    .skipMemoryCache(false)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(commentVH.getIvAuthorPic());
+
+            commentVH.getTvAuthor().setText(comment.getAuthor());
+
+            ImageView ivThumb = commentVH.getIvThumb();
+            if (stateHolder.isLiked()) {
+                ivThumb.setImageResource(R.mipmap.thumb_blue);
+            } else {
+                ivThumb.setImageResource(R.mipmap.thumb_gray);
+            }
+
+            commentVH.getTvPopularityNum().setText("" + comment.getLikes());
+
+            commentVH.getTvComment().setText(comment.getContent());
+
+
+            TextView tvOpenCloseBtn = commentVH.getTvOpenCloseBtn();
+            TextView tvReplyComment = commentVH.getTvReplyComment();
+            tvOpenCloseBtn.setOnClickListener((v) -> {
+                stateHolder.setNeedExpand(true);
+                TextView tv = (TextView) v;
+                if (tv.getText().equals("展开")) {
+                    tv.setText("收起");
+                    tvReplyComment.setMaxLines(stateHolder.getRealReplyCommentLine());
+                    stateHolder.setExpanded(true);
+                    stateHolder.setDisplayedReplyCommentLine(stateHolder.getRealReplyCommentLine());
+                } else {
+                    tv.setText("展开");
+                    tvReplyComment.setMaxLines(2);
+                    stateHolder.setExpanded(false);
+                    stateHolder.setDisplayedReplyCommentLine(2);
+                }
+            });
+
+            if (stateHolder.isFirstCreated()) {
+                if (comment.getReplyAuthorId() == 0) {
+                    tvOpenCloseBtn.setVisibility(View.GONE);
+                    tvReplyComment.setVisibility(View.GONE);
+                    stateHolder.setHasReply(false);
+                    stateHolder.setExpanded(false);
+                    stateHolder.setNeedExpand(false);
+                    stateHolder.setDisplayedReplyCommentLine(0);
+                    stateHolder.setRealReplyCommentLine(0);
+                } else {
+                    tvReplyComment.setVisibility(View.VISIBLE);
+                    SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
+                    spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    tvReplyComment.setText(spannableString);
+                    tvReplyComment.post(() -> {
+                        //当maxLine<实际行数时，getLineCount()返回maxLine；
+                        //当maxLine>实际行数时，getLineCount()返回实际行数；
+                        //复用前TextView setMaxLine(2)导致复用后就算实际行数>2，getLineCount()方法也只返回maxLine的值：2
+                        //所以在onViewRecycled方法中调用setMaxLine(100)，使得复用后的TextView调用getLineCount()方法返回正确的行数
+                        int lineCount = tvReplyComment.getLineCount();
+                        if (lineCount <= 2) {
+                            tvReplyComment.setMaxLines(lineCount);
+                            tvOpenCloseBtn.setVisibility(View.GONE);
+                            stateHolder.setDisplayedReplyCommentLine(lineCount);
+                            stateHolder.setNeedExpand(false);
+                        } else {
+                            tvReplyComment.setMaxLines(2);
+                            tvOpenCloseBtn.setVisibility(View.VISIBLE);
+                            tvOpenCloseBtn.setText("展开");
+                            stateHolder.setDisplayedReplyCommentLine(2);
+                            stateHolder.setNeedExpand(true);
+                        }
+                        stateHolder.setRealReplyCommentLine(lineCount);
+                    });
+                    stateHolder.setHasReply(true);
+                    stateHolder.setExpanded(false);
+                }
+            } else {
+                if (stateHolder.isHasReply()) {
+                    tvReplyComment.setVisibility(View.VISIBLE);
+                    SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
+                    spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    tvReplyComment.setText(spannableString);
+                    tvReplyComment.setMaxLines(stateHolder.getDisplayedReplyCommentLine());
+                    if (stateHolder.isNeedExpand()) {
                         tvOpenCloseBtn.setVisibility(View.VISIBLE);
-                        tvOpenCloseBtn.setText("展开");
-                        stateHolder.setDisplayedReplyCommentLine(2);
-                        stateHolder.setNeedExpand(true);
-                    }
-                    stateHolder.setRealReplyCommentLine(lineCount);
-                });
-                stateHolder.setHasReply(true);
-                stateHolder.setExpanded(false);
-            }
-        } else {
-            if (stateHolder.isHasReply()) {
-                tvReplyComment.setVisibility(View.VISIBLE);
-                SpannableString spannableString = new SpannableString("//" + comment.getReplyAuthor() + "：" + comment.getReplyContent());
-                spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-                spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-                tvReplyComment.setText(spannableString);
-                tvReplyComment.setMaxLines(stateHolder.getDisplayedReplyCommentLine());
-                if (stateHolder.isNeedExpand()) {
-                    tvOpenCloseBtn.setVisibility(View.VISIBLE);
-                    if (stateHolder.isExpanded()) {
-                        tvOpenCloseBtn.setText("收起");
+                        if (stateHolder.isExpanded()) {
+                            tvOpenCloseBtn.setText("收起");
+                        } else {
+                            tvOpenCloseBtn.setText("展开");
+                        }
                     } else {
-                        tvOpenCloseBtn.setText("展开");
+                        tvOpenCloseBtn.setVisibility(View.GONE);
                     }
                 } else {
                     tvOpenCloseBtn.setVisibility(View.GONE);
+                    tvReplyComment.setVisibility(View.GONE);
                 }
+            }
+
+
+            commentVH.getTvTime().setText("" + comment.getTime());
+
+            stateHolder.setFirstCreated(false);
+        } else if (getItemViewType(position) == ITEMTYPE.LONG_GROUP_TITLE.ordinal()) {
+            LongGroupTitleVH longGroupTitleVH = (LongGroupTitleVH) holder;
+            longGroupTitleVH.getTvLongCommentGroupTitle().setText(mHelper.allNumOfLongComments + "条长评");
+        } else if (getItemViewType(position) == ITEMTYPE.SHORT_GROUP_TITLE.ordinal()) {
+            ShortGroupTitleVH shortGroupTitleVH = (ShortGroupTitleVH) holder;
+            shortGroupTitleVH.getTvShortCommentGroupTitle().setText(mHelper.allNumOfShortComments + "条短评");
+            shortGroupTitleVH.getLlExpandBtn().setOnClickListener((v) -> {
+                if (mActivity.isNetworkConnected()) {
+                    if (!isShortsCommentsExpanded) {
+                        if (!isLoading) {
+                            isLoading = true;
+                            shortGroupTitleVH.getPbShortCommentsLoading().setVisibility(View.VISIBLE);
+                            new Thread(() -> {
+                                mHelper.obtainShortCommentsByStep();
+                                ((CommentsActivity) v.getContext()).runOnUiThread(() -> {
+                                    shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_less_black_48);
+                                    notifyItemRangeInserted(2 + Math.max(1, mHelper.longComments.size()), mHelper.currentLoadedShortComments);
+                                    shortGroupTitleVH.getPbShortCommentsLoading().setVisibility(View.INVISIBLE);
+                                    isShortsCommentsExpanded = true;
+                                    isLoading = false;
+                                });
+                            }).start();
+                        }
+                    } else {
+                        if (!isLoading) {
+                            notifyItemRangeRemoved(2 + Math.max(1, mHelper.longComments.size()), mHelper.shortComments.size());
+                            stateHolders.subList(mHelper.longComments.size(), stateHolders.size()).clear();
+                            mHelper.clearAllShortComments();
+                            shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_more_black_48);
+                            isShortsCommentsExpanded = false;
+                        }
+                    }
+                } else {
+                    Toast.makeText(mActivity, "网络不可用", Toast.LENGTH_SHORT).show();
+                }
+            });
+            if (isShortsCommentsExpanded) {
+                shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_less_black_48);
             } else {
-                tvOpenCloseBtn.setVisibility(View.GONE);
-                tvReplyComment.setVisibility(View.GONE);
+                shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_more_black_48);
             }
         }
-
-        //???????????????????????????????????????????????????????????????????????????
-
-
-        commentVH.getTvTime().setText("" + comment.getTime());
-
-        stateHolder.setFirstCreated(false);
-
     }
 
     @Override
@@ -202,6 +266,15 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             tvReply.setMaxLines(100000);
         }
         super.onViewRecycled(holder);
+    }
+
+    //在进入Activity后的加载中使用
+    //在首次加载过程中隐藏没有长评的提示图片，加载后如果没有长评则显示图片
+    public void notifyCommentSetChanged() {
+        if (mHelper.longComments.isEmpty()) {
+            noneLongPlaceHolderVH.getLlNoneCommentPlaceholder().setVisibility(View.VISIBLE);
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -230,6 +303,14 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             } else {
                 return ITEMTYPE.COMMENT.ordinal();
             }
+        }
+    }
+
+    private int getCommentPosition(int position) {
+        if (position - 1 <= Math.max(1, mHelper.longComments.size())) {
+            return position - 1;
+        } else {
+            return position - (mHelper.longComments.isEmpty() ? 3 : 2);
         }
     }
 
@@ -316,6 +397,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         private LinearLayout llExpandBtn = null;
         private TextView tvShortCommentGroupTitle = null;
         private ImageView ivExpandingPic = null;
+        private ProgressBar pbShortCommentsLoading = null;
 
         public LinearLayout getLlExpandBtn() {
             return llExpandBtn;
@@ -329,18 +411,30 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             return ivExpandingPic;
         }
 
+        public ProgressBar getPbShortCommentsLoading() {
+            return pbShortCommentsLoading;
+        }
+
         public ShortGroupTitleVH(@NonNull View itemView) {
             super(itemView);
             llExpandBtn = itemView.findViewById(R.id.ll_expandBtn);
             tvShortCommentGroupTitle = itemView.findViewById(R.id.tv_shortCommentGroupTitle);
             ivExpandingPic = itemView.findViewById(R.id.iv_expandingPic);
+            pbShortCommentsLoading = itemView.findViewById(R.id.pb_shortCommentsLoading);
         }
     }
 
     class NoneLongPlaceHolderVH extends RecyclerView.ViewHolder {
 
+        private LinearLayout llNoneCommentPlaceholder = null;
+
+        public LinearLayout getLlNoneCommentPlaceholder() {
+            return llNoneCommentPlaceholder;
+        }
+
         public NoneLongPlaceHolderVH(@NonNull View itemView) {
             super(itemView);
+            llNoneCommentPlaceholder = itemView.findViewById(R.id.ll_noneCommentPlaceholder);
         }
     }
 
