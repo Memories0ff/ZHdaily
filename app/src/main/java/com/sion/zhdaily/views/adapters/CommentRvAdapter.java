@@ -111,11 +111,14 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
             commentVH.getLlPopCommentMenuBtn().setOnClickListener((v -> Toast.makeText(mActivity, "弹出菜单", Toast.LENGTH_SHORT).show()));
 
-            Glide.with(mActivity)
-                    .load(comment.getAvatarUrl())
-                    .skipMemoryCache(false)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(commentVH.getIvAuthorPic());
+            //防止在挂靠的Activity已被销毁的情况下使用Glide
+            if (!mActivity.isDestroyed()) {
+                Glide.with(mActivity)
+                        .load(comment.getAvatarUrl())
+                        .skipMemoryCache(false)
+                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                        .into(commentVH.getIvAuthorPic());
+            }
 
             commentVH.getTvAuthor().setText(comment.getAuthor());
 
@@ -131,9 +134,12 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             commentVH.getTvComment().setText(comment.getContent());
 
 
-            TextView tvOpenCloseBtn = commentVH.getTvOpenCloseBtn();
+            TextView tvExpandBtn = commentVH.getTvOpenCloseBtn();
             TextView tvReplyComment = commentVH.getTvReplyComment();
-            tvOpenCloseBtn.setOnClickListener((v) -> {
+
+
+            tvExpandBtn.setOnClickListener(null);
+            tvExpandBtn.setOnClickListener((v) -> {
                 stateHolder.setNeedExpand(true);
                 TextView tv = (TextView) v;
                 if (tv.getText().equals("展开")) {
@@ -151,7 +157,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
             if (stateHolder.isFirstCreated()) {
                 if (comment.getReplyAuthorId() == 0) {
-                    tvOpenCloseBtn.setVisibility(View.GONE);
+                    tvExpandBtn.setVisibility(View.GONE);
                     tvReplyComment.setVisibility(View.GONE);
                     stateHolder.setHasReply(false);
                     stateHolder.setExpanded(false);
@@ -164,6 +170,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                     spannableString.setSpan(new StyleSpan(Typeface.BOLD), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                     spannableString.setSpan(new ForegroundColorSpan(Color.BLACK), 0, 3 + comment.getReplyAuthor().length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
                     tvReplyComment.setText(spannableString);
+                    tvReplyComment.post(null);
                     tvReplyComment.post(() -> {
                         //当maxLine<实际行数时，getLineCount()返回maxLine；
                         //当maxLine>实际行数时，getLineCount()返回实际行数；
@@ -172,13 +179,13 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                         int lineCount = tvReplyComment.getLineCount();
                         if (lineCount <= 2) {
                             tvReplyComment.setMaxLines(lineCount);
-                            tvOpenCloseBtn.setVisibility(View.GONE);
+                            tvExpandBtn.setVisibility(View.GONE);
                             stateHolder.setDisplayedReplyCommentLine(lineCount);
                             stateHolder.setNeedExpand(false);
                         } else {
                             tvReplyComment.setMaxLines(2);
-                            tvOpenCloseBtn.setVisibility(View.VISIBLE);
-                            tvOpenCloseBtn.setText("展开");
+                            tvExpandBtn.setVisibility(View.VISIBLE);
+                            tvExpandBtn.setText("展开");
                             stateHolder.setDisplayedReplyCommentLine(2);
                             stateHolder.setNeedExpand(true);
                         }
@@ -196,17 +203,17 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                     tvReplyComment.setText(spannableString);
                     tvReplyComment.setMaxLines(stateHolder.getDisplayedReplyCommentLine());
                     if (stateHolder.isNeedExpand()) {
-                        tvOpenCloseBtn.setVisibility(View.VISIBLE);
+                        tvExpandBtn.setVisibility(View.VISIBLE);
                         if (stateHolder.isExpanded()) {
-                            tvOpenCloseBtn.setText("收起");
+                            tvExpandBtn.setText("收起");
                         } else {
-                            tvOpenCloseBtn.setText("展开");
+                            tvExpandBtn.setText("展开");
                         }
                     } else {
-                        tvOpenCloseBtn.setVisibility(View.GONE);
+                        tvExpandBtn.setVisibility(View.GONE);
                     }
                 } else {
-                    tvOpenCloseBtn.setVisibility(View.GONE);
+                    tvExpandBtn.setVisibility(View.GONE);
                     tvReplyComment.setVisibility(View.GONE);
                 }
             }
@@ -236,6 +243,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                                     isShortsCommentsExpanded = true;
                                     isLoading = false;
                                 });
+
                             }).start();
                         }
                     } else {
@@ -258,6 +266,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             }
         }
     }
+
 
     @Override
     public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
@@ -314,7 +323,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         }
     }
 
-    class CommentVH extends RecyclerView.ViewHolder {
+    private static class CommentVH extends RecyclerView.ViewHolder {
 
         //控件
         private LinearLayout llPopCommentMenuBtn = null;
@@ -378,7 +387,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         }
     }
 
-    class LongGroupTitleVH extends RecyclerView.ViewHolder {
+    private static class LongGroupTitleVH extends RecyclerView.ViewHolder {
 
         private TextView tvLongCommentGroupTitle = null;
 
@@ -392,7 +401,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         }
     }
 
-    class ShortGroupTitleVH extends RecyclerView.ViewHolder {
+    private static class ShortGroupTitleVH extends RecyclerView.ViewHolder {
 
         private LinearLayout llExpandBtn = null;
         private TextView tvShortCommentGroupTitle = null;
@@ -424,7 +433,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         }
     }
 
-    class NoneLongPlaceHolderVH extends RecyclerView.ViewHolder {
+    private static class NoneLongPlaceHolderVH extends RecyclerView.ViewHolder {
 
         private LinearLayout llNoneCommentPlaceholder = null;
 
@@ -438,7 +447,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         }
     }
 
-    class StateHolder {
+    private static class StateHolder {
 
         //保存控件状态
         private boolean hasReply = false;

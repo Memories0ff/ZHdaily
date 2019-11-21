@@ -8,6 +8,7 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -133,44 +134,60 @@ public class NewsContentActivity extends Activity {
             //下载新闻内容等数据
             content = helper.getNewsContentById(id);
             runOnUiThread(() -> {
-                //显示这些数据
-                tvCommentNum.setText("" + content.getComments());
-                tvPopularityNum.setText("" + content.getPopularity());
+                //防止在执行时Activity已经退出造成崩溃
+                try {
+                    //显示这些数据
+                    tvCommentNum.setText("" + content.getComments());
+                    tvPopularityNum.setText("" + content.getPopularity());
+//                    异步加载，使用Glide加载前要判断挂靠的Activity是否已经销毁
+                    if (!NewsContentActivity.this.isDestroyed()) {
+                        Glide.with(NewsContentActivity.this)
+                                .load(content.getImageUrl())
+                                .skipMemoryCache(false)
+                                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                                .into(ivNewsContentTitlePic);
+                    } else {
+                        //若已销毁则直接退出
+                        return;
+                    }
+                    tvNewsContentTitle.setText(content.getTitle());
 
-                Glide.with(this)
-                        .load(content.getImageUrl())
-                        .skipMemoryCache(false)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .into(ivNewsContentTitlePic);
-                tvNewsContentTitle.setText(content.getTitle());
-
+                    //若在此之前Activity已被销毁则不执行
+                    if (wvNewsContent != null) {
 //                webView.getSettings().setJavaScriptEnabled(true);
-                wvNewsContent.getSettings().setBlockNetworkImage(false);
-                wvNewsContent.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                        wvNewsContent.getSettings().setBlockNetworkImage(false);
+                        wvNewsContent.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
 //                wvNewsContent.loadData("<link rel=\"stylesheet\" type=\"text/css\" href=\"" + content.getCssUrl() + "\" /> " + content.getHtmlContent(), "text/html;charset=UTF-8", null);
 //                wvNewsContent.loadData(content.getHtmlContent(), "text/html;charset=UTF-8", null);
-                wvNewsContent.loadDataWithBaseURL("file:///android_asset/", "<link rel=\"stylesheet\" type=\"text/css\" href=\"news_content.css\"" + " /> " + content.getHtmlContent(), "text/html", "UTF-8", null);
-
-                //等到数据加载完后设置点击事件
-                llCommentsBtn.setOnClickListener((v) -> {
-                    if (isNetworkConnected()) {
-                        Intent commentsIntent = new Intent(NewsContentActivity.this, CommentsActivity.class);
-                        commentsIntent.putExtra("newsId", content.getId());
-                        commentsIntent.putExtra("longCommentNum", content.getLongComments());
-                        commentsIntent.putExtra("shortCommentNum", content.getShortComments());
-                        commentsIntent.putExtra("commentNum", content.getLongComments() + content.getShortComments());
-                        startActivity(commentsIntent);
+                        wvNewsContent.loadDataWithBaseURL("file:///android_asset/", "<link rel=\"stylesheet\" type=\"text/css\" href=\"news_content.css\"" + " /> " + content.getHtmlContent(), "text/html", "UTF-8", null);
                     } else {
-                        Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
+                        //若已销毁则直接退出
+                        return;
                     }
-                });
-                llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
-                ivShareBtn.setOnClickListener((v) -> Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show());
-                ivCollectBtn.setOnClickListener((v) -> Toast.makeText(this, "收藏", Toast.LENGTH_SHORT).show());
-
+                    //等到数据加载完后设置点击事件
+                    llCommentsBtn.setOnClickListener((v) -> {
+                        if (isNetworkConnected()) {
+                            Intent commentsIntent = new Intent(NewsContentActivity.this, CommentsActivity.class);
+                            commentsIntent.putExtra("newsId", content.getId());
+                            commentsIntent.putExtra("longCommentNum", content.getLongComments());
+                            commentsIntent.putExtra("shortCommentNum", content.getShortComments());
+                            commentsIntent.putExtra("commentNum", content.getLongComments() + content.getShortComments());
+                            startActivity(commentsIntent);
+                        } else {
+                            Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
+                    ivShareBtn.setOnClickListener((v) -> Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show());
+                    ivCollectBtn.setOnClickListener((v) -> Toast.makeText(this, "收藏", Toast.LENGTH_SHORT).show());
+                } catch (Exception e) {
+                    Log.e("NewsContentActivity Unknown ERROR", e.getMessage());
+                    e.printStackTrace();
+                }
             });
         }).start();
     }
+
 
     @Override
     protected void onResume() {
@@ -187,6 +204,7 @@ public class NewsContentActivity extends Activity {
     @Override
     protected void onDestroy() {
         releaseWebView();
+        connMgr.unregisterNetworkCallback(networkCallback);
         super.onDestroy();
     }
 

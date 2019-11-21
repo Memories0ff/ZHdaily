@@ -1,62 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/clickable_view"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_marginLeft="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginRight="16dp"
+    android:background="#FFFFFF"
+    app:cardCornerRadius="10dp">
 
-    <TextView
-        android:id="@+id/tv_newsDate"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:layout_marginStart="15dp"
-        android:gravity="center_vertical"
-        android:textColor="#000000"
-        android:textSize="16sp"
-        android:visibility="gone" />
-
-
-    <androidx.cardview.widget.CardView
-        android:id="@+id/clickable_view"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="5dp"
-        app:cardCornerRadius="10dp">
+        android:layout_height="wrap_content"
+        android:background="@drawable/ripple_bg"
+        android:orientation="vertical">
 
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
+        <TextView
+            android:id="@+id/tv_newsDate"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/ripple_bg"
-            android:orientation="horizontal">
+            android:layout_height="40dp"
+            android:background="#EEEEEE"
+            android:paddingLeft="16dp"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="xx月xx日 星期x" />
 
-            <TextView
-                android:id="@+id/tv_newsTitle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:layout_weight="4"
-                android:maxLines="4"
-                android:textColor="#000000"
-                android:textSize="17sp"
-                tools:text="测试" />
+        <TextView
+            android:id="@+id/tv_newsTitle"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp"
+            android:maxLines="4"
+            android:textColor="#000000"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_newsTitlePic"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_newsDate"
+            tools:text="测试" />
 
-            <ImageView
-                android:id="@+id/iv_newsTitlePic"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="0dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginBottom="10dp"
-                android:layout_weight="1"
-                android:src="@mipmap/ic_launcher"
-                tools:src="@mipmap/ic_launcher" />
+        <ImageView
+            android:id="@+id/iv_newsTitlePic"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_newsDate"
+            tools:src="@mipmap/ic_launcher" />
 
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
-</LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.cardview.widget.CardView>

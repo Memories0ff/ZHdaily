@@ -124,6 +124,7 @@ public class NewsSummariesHelper {
             newsSummariesList.clear();
             //获取头条和最新新闻列表
             getNewsSummariesDayByDay();
+            getNewsSummariesDayByDay();
             return true;
         }
         return false;

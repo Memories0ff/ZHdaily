@@ -102,23 +102,17 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             textViewNewsTitle.setText(mContents.get(realPosition).getTitle());
 
             ImageView imageView = newsSummaryViewHolder.getIvNewsTitlePic();
-            Glide.with(mainActivity)
-                    .load(mContents.get(realPosition).getImageUrl())
-                    .skipMemoryCache(false)
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .into(imageView);
-
+            //防止在挂靠的Activity已被销毁的情况下使用Glide
+            if (!mainActivity.isDestroyed()) {
+                Glide.with(mainActivity)
+                        .load(mContents.get(realPosition).getImageUrl())
+                        .skipMemoryCache(false)
+                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                        .into(imageView);
+            }
             View clickableView = newsSummaryViewHolder.getClickableView();
-            clickableView.setOnClickListener((v) -> {
-//                Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show();
-                if (mainActivity.isNetworkConnected()) {
-                    Intent intent = new Intent(mainActivity, NewsContentActivity.class);
-                    intent.putExtra("id", mContents.get(realPosition).getId());
-                    mainActivity.startActivity(intent);
-                } else {
-                    Toast.makeText(mainActivity, "网络不可用", Toast.LENGTH_SHORT).show();
-                }
-            });
+            clickableView.setTag(realPosition);
+            clickableView.setOnClickListener(onClickListener);
             //某天的第一条新闻要显示日期
             if (mContents.get(realPosition).isFirstNewsSummary()) {
                 newsSummaryViewHolder.getTvNewsDate().setVisibility(View.VISIBLE);
@@ -131,6 +125,18 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             }
         }
     }
+
+    //列表项点击事件
+    private View.OnClickListener onClickListener = (v) -> {
+//                Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show();
+        if (mainActivity.isNetworkConnected()) {
+            Intent intent = new Intent(mainActivity, NewsContentActivity.class);
+            intent.putExtra("id", mContents.get((int) v.getTag()).getId());
+            mainActivity.startActivity(intent);
+        } else {
+            Toast.makeText(mainActivity, "网络不可用", Toast.LENGTH_SHORT).show();
+        }
+    };
 
     @Override
     public int getItemViewType(int position) {

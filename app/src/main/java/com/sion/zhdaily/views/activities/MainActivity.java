@@ -9,13 +9,12 @@ import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.Toolbar;
 
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
@@ -23,6 +22,7 @@ import com.sion.zhdaily.R;
 import com.sion.zhdaily.presenters.NewsSummariesHelper;
 import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
 import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
+import com.sion.zhdaily.views.views.FixedLinearLayoutManager;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
 
@@ -41,11 +41,9 @@ public class MainActivity extends Activity {
 
     Toolbar tb = null;
     TextView tbTvTitle = null;
-//    ImageView tbIvMore = null;
-//    PopupMenu popupMenu = null;
 
     DrawerLayout dl = null;
-    LinearLayout llToIndexBtn = null;
+    FrameLayout flToIndexBtn = null;
 
     SwipeRefreshLayout srl = null;
 
@@ -71,8 +69,8 @@ public class MainActivity extends Activity {
 
         //设置DrawerLayout
         dl = findViewById(R.id.dl);
-        llToIndexBtn = findViewById(R.id.ll_toIndex);
-        llToIndexBtn.setOnClickListener((v) -> update());
+        flToIndexBtn = findViewById(R.id.fl_toIndex);
+        flToIndexBtn.setOnClickListener((v) -> update());
 
         //设置标题栏
         //标题文字
@@ -93,35 +91,10 @@ public class MainActivity extends Activity {
             }
             return false;
         });
-//        //三个点按钮和PopupMenu
-//        tbIvMore = findViewById(R.id.iv_tbMore);
-//        popupMenu = new PopupMenu(this, tb, Gravity.END);
-//        popupMenu.getMenuInflater().inflate(R.menu.popup_menu, popupMenu.getMenu());
-////        //滑动按钮打开菜单
-////        tbIvMore.setOnTouchListener(popupMenu.getDragToOpenListener());
-//        popupMenu.setOnMenuItemClickListener((menuItem) -> {
-//            switch (menuItem.getItemId()) {
-//                case R.id.switchMode:
-//                    Toast.makeText(this, "切换模式", Toast.LENGTH_SHORT).show();
-//                    return true;
-//                case R.id.setting:
-//                    Toast.makeText(this, "设置选项", Toast.LENGTH_SHORT).show();
-//                    return true;
-//            }
-//            return false;
-//        });
-//        tbIvMore.setOnClickListener((v) -> {
-//            //弹出popupmenu
-//            popupMenu.show();
-//        });
 
         //下拉刷新
         srl = findViewById(R.id.srl_update);
-        srl.setOnRefreshListener(() -> {
-            srl.setRefreshing(true);
-            update();
-            srl.setRefreshing(false);
-        });
+        srl.setOnRefreshListener(refreshListener);
 
 
         //设置显示新闻的ViewPager轮播图和对应adapter
@@ -134,7 +107,7 @@ public class MainActivity extends Activity {
 
         //设置显示新闻的RecycyerView和对应adapter
         rv = findViewById(R.id.rv);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setLayoutManager(new FixedLinearLayoutManager(this));
         rvAdapter = new NewsSummaryListRvAdapter(this, rv, helper.newsSummariesList, headerView);
         rvAdapter.setOnTopViewPagerMoveToTopListener(() -> tbTvTitle.setText("首页"));
         rvAdapter.setOnItemMoveToTopListener((pos) -> tbTvTitle.setText(helper.newsSummariesList.get(pos).getDateStr()));
@@ -150,45 +123,60 @@ public class MainActivity extends Activity {
                     pagerAdapter.setLoading(false);
                     pagerAdapter.startTimingPageRoll();
                     rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
+                });
+                helper.getNewsSummariesDayByDay();
+                runOnUiThread(() -> {
+                    rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
                     rvAdapter.setLoading(false);
                 });
             }).start();
         }
     }
 
+    private SwipeRefreshLayout.OnRefreshListener refreshListener = () -> {
+        srl.setRefreshing(true);
+        update();
+        srl.setRefreshing(false);
+    };
+
 
     private void update() {
         if (isNetworkConnected) {
-            new Thread(() -> {
-                pagerAdapter.setLoading(true);
-                rvAdapter.setLoading(true);
-                if (helper.update()) {
-                    runOnUiThread(() -> {
-                        pagerAdapter.stopTimingPageRoll();
-                        pagerAdapter.notifyDataSetChanged();
-                        //轮播图设为初始位置
-                        vpTopNews.setCurrentItem(0);
-                        pagerAdapter.startTimingPageRoll();
-                        pagerAdapter.setLoading(false);
-
-                        rvAdapter.notifyDataSetChanged();
-                        rvAdapter.setLoading(false);
-                        Toast.makeText(this, "更新完成", Toast.LENGTH_SHORT).show();
-                        if (dl.isDrawerOpen(Gravity.LEFT)) {
-                            dl.closeDrawer(Gravity.LEFT);
-                        }
-                    });
-                } else {
-                    pagerAdapter.setLoading(false);
-                    rvAdapter.setLoading(false);
-                    runOnUiThread(() -> Toast.makeText(this, "加载失败", Toast.LENGTH_SHORT).show());
-//                pagerAdapter.startTimingPageRoll();
-                }
-            }).start();
+            new Thread(updateSummary).start();
         } else {
             Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
         }
     }
+
+    //更新新闻列表操作Runnable
+    private Runnable updateSummary = () -> {
+        pagerAdapter.setLoading(true);
+        rvAdapter.setLoading(true);
+        if (helper.update()) {
+            runOnUiThread(() -> {
+                rvAdapter.notifyDataSetChanged();
+                rvAdapter.setLoading(false);
+
+                pagerAdapter.stopTimingPageRoll();
+                pagerAdapter.notifyDataSetChanged();
+                //轮播图设为初始位置
+                vpTopNews.setCurrentItem(0);
+                pagerAdapter.startTimingPageRoll();
+                pagerAdapter.setLoading(false);
+
+                Toast.makeText(MainActivity.this, "更新完成", Toast.LENGTH_SHORT).show();
+                if (dl.isDrawerOpen(Gravity.LEFT)) {
+                    dl.closeDrawer(Gravity.LEFT);
+                }
+            });
+        } else {
+            pagerAdapter.setLoading(false);
+            rvAdapter.setLoading(false);
+            runOnUiThread(() -> Toast.makeText(MainActivity.this, "加载失败", Toast.LENGTH_SHORT).show());
+//                pagerAdapter.startTimingPageRoll();
+        }
+
+    };
 
     @Override
     public void onBackPressed() {

@@ -1,128 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/dl_left"
     android:layout_width="300dp"
     android:layout_height="match_parent"
     android:layout_gravity="start"
-    android:background="#FFFFFF"
-    android:orientation="vertical">
+    android:background="#FFFFFF">
 
-    <LinearLayout
-        android:id="@+id/ll_signUp"
+    <FrameLayout
+        android:id="@+id/frameLayout"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center"
+        android:layout_height="0dp"
         android:background="#00A2ED"
-        android:clickable="true"
-        android:gravity="center"
-        android:orientation="horizontal">
+        app:layout_constraintBottom_toBottomOf="@id/tv_myCollection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
-        <com.shehuan.niv.NiceImageView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_margin="10dp"
-            android:layout_weight="1"
-            android:src="@mipmap/account_avatar"
-            app:is_circle="true" />
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="5"
-            android:gravity="center_vertical"
-            android:text="请登录"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp" />
+    <com.shehuan.niv.NiceImageView
+        android:id="@+id/niv_signUp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="24dp"
+        android:layout_weight="1"
+        android:src="@mipmap/account_avatar"
+        app:is_circle="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.07"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tv_signUp"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginTop="24dp"
+        android:gravity="center_vertical"
+        android:text="请登录"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <LinearLayout
+    <ImageView
+        android:id="@+id/iv_myCollection"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="24dp"
+        android:layout_weight="1"
+        android:src="@mipmap/star_white"
+        app:layout_constraintEnd_toEndOf="@+id/niv_signUp"
+        app:layout_constraintStart_toStartOf="@+id/niv_signUp"
+        app:layout_constraintTop_toBottomOf="@+id/niv_signUp" />
+
+    <TextView
+        android:id="@+id/tv_myCollection"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_weight="2"
+        android:gravity="center_vertical"
+        android:text="我的收藏"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_myCollection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.13"
+        app:layout_constraintStart_toEndOf="@+id/iv_myCollection"
+        app:layout_constraintTop_toTopOf="@+id/iv_myCollection" />
+
+    <TextView
+        android:id="@+id/tv_offlineDownload"
+        android:layout_width="wrap_content"
+        android:layout_height="45dp"
+        android:layout_weight="2"
+        android:gravity="center_vertical"
+        android:text="离线下载"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_offlineDownload"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_offlineDownload"
+        app:layout_constraintTop_toTopOf="@+id/iv_offlineDownload" />
+
+    <ImageView
+        android:id="@+id/iv_offlineDownload"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_weight="1"
+        android:src="@mipmap/download_white"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_myCollection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.2"
+        app:layout_constraintStart_toEndOf="@+id/tv_myCollection"
+        app:layout_constraintTop_toTopOf="@+id/tv_myCollection" />
+
+
+    <ImageView
+        android:id="@+id/iv_toIndex"
+        android:layout_width="0dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="24dp"
+        android:layout_weight="1"
+        android:src="@mipmap/home"
+        app:layout_constraintEnd_toEndOf="@+id/iv_myCollection"
+        app:layout_constraintStart_toStartOf="@+id/iv_myCollection"
+        app:layout_constraintTop_toBottomOf="@+id/iv_myCollection" />
+
+    <TextView
+        android:id="@+id/tv_toIndex"
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_weight="5"
+        android:gravity="center_vertical"
+        android:text="首页"
+        android:textColor="#00A2ED"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_toIndex"
+        app:layout_constraintStart_toStartOf="@+id/tv_myCollection"
+        app:layout_constraintTop_toTopOf="@+id/iv_toIndex" />
+
+    <FrameLayout
+        android:id="@+id/fl_toIndex"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:background="#00A2ED"
-        android:clickable="true"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_height="0dp"
+        android:background="#10000000"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_toIndex"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/frameLayout"
+        app:layout_constraintVertical_bias="0.0" />
 
-        <LinearLayout
-            android:id="@+id/ll_myCollection"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="20dp"
-                android:layout_margin="15dp"
-                android:layout_weight="1"
-                android:src="@mipmap/star_white" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="45dp"
-                android:layout_marginLeft="6dp"
-                android:layout_weight="2"
-                android:gravity="center_vertical"
-                android:text="我的收藏"
-                android:textColor="#FFFFFF" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/ll_offlineDownload"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical">
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="20dp"
-                android:layout_margin="10dp"
-                android:layout_weight="1"
-                android:src="@mipmap/download_white" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="45dp"
-                android:layout_marginLeft="6dp"
-                android:layout_weight="2"
-                android:gravity="center_vertical"
-                android:text="离线下载"
-                android:textColor="#FFFFFF" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/ll_toIndex"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:layout_margin="13dp"
-            android:layout_weight="1"
-            android:src="@mipmap/home" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
-            android:layout_weight="5"
-            android:gravity="center_vertical"
-            android:text="首页"
-            android:textColor="#00A2ED"
-            android:textSize="20sp" />
-
-    </LinearLayout>
-
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -88,9 +88,7 @@ public class CommentsActivity extends AppCompatActivity {
         if (isNetworkConnected()) {
             new Thread(() -> {
                 mHelper.obtainAllLongComments();
-//                mHelper.obtainShortCommentsByStep(newsId);
                 runOnUiThread(() -> {
-//                    mCommentAdapter.notifyDataSetChanged();
                     mCommentAdapter.notifyCommentSetChanged();
                     pdLoading.dismiss();
                 });
@@ -100,6 +98,11 @@ public class CommentsActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        connMgr.unregisterNetworkCallback(networkCallback);
+    }
 
     class NetworkCallbackImpl extends ConnectivityManager.NetworkCallback {
         @Override

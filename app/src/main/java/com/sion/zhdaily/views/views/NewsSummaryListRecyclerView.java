@@ -49,11 +49,14 @@ public class NewsSummaryListRecyclerView extends RecyclerView {
                         //在新线程中进行加载操作
                         new Thread(() -> {
                             MainActivity mainActivity = adapter.mainActivity;
+                            //一次加载三天内容
                             mainActivity.helper.getNewsSummariesDayByDay();
-//                      Toast.makeText(mainActivity, "加载完成", Toast.LENGTH_SHORT).show();
+                            mainActivity.runOnUiThread(() -> adapter.notifyNewsSummaryItemInserted(mainActivity.helper.insertRangeStartPosition, mainActivity.helper.loadedNewsSummaryNum));
+                            mainActivity.helper.getNewsSummariesDayByDay();
+                            mainActivity.runOnUiThread(() -> adapter.notifyNewsSummaryItemInserted(mainActivity.helper.insertRangeStartPosition, mainActivity.helper.loadedNewsSummaryNum));
+                            mainActivity.helper.getNewsSummariesDayByDay();
                             //加载完成，设置为不在加载
                             mainActivity.runOnUiThread(() -> {
-//                            adapter.notifyDataSetChanged();
                                 adapter.notifyNewsSummaryItemInserted(mainActivity.helper.insertRangeStartPosition, mainActivity.helper.loadedNewsSummaryNum);
                                 adapter.setLoading(false);
                             });

@@ -59,6 +59,7 @@ dependencies {
     implementation 'com.romandanylyk:pageindicatorview:1.0.3'   //ViewPager Indicator
     implementation 'com.github.SheHuan:NiceImageView:1.0.5'     //圆形ImageView
 //    implementation 'com.google.android.material:material:1.0.0' //google 图标库
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.0-beta-4' //内存泄漏检测
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'androidx.appcompat:appcompat:1.1.0'

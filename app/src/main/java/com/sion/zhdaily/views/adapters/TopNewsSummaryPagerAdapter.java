@@ -21,6 +21,7 @@ import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
 import com.sion.zhdaily.views.activities.NewsContentActivity;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -85,31 +86,6 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         container.addView(mViews.get(position));
         return mViews.get(position);
-//        View view = LayoutInflater.from(mContext).inflate(R.layout.rv_top_view_pager_item_view, container, false);
-//        ImageView imageView = view.findViewById(R.id.iv_topNewsPic);
-//        Glide.with(mContext)
-//                .load(mContents.get(position).getImageUrl())
-//                .skipMemoryCache(false)
-//                .diskCacheStrategy(DiskCacheStrategy.ALL)
-//                .into(imageView);
-//        TextView textView = view.findViewById(R.id.tv_topNewsTitle);
-//        textView.setText(mContents.get(position).getTitle());
-//        view.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-////                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
-//                if (((MainActivity) mContext).isNetworkConnected()) {
-//                    Intent intent = new Intent(mContext, NewsContentActivity.class);
-//                    intent.putExtra("id", mContents.get(position).getId());
-//                    mContext.startActivity(intent);
-//                } else {
-//                    Toast.makeText(mContext, "网络不可用", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-//        container.addView(view);
-//        return view;
-        //????????????????????√
     }
 
     @Override
@@ -130,46 +106,52 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
         for (int i = 0; i < mContents.size(); i++) {
             View view = LayoutInflater.from(mContext).inflate(R.layout.rv_top_view_pager_item_view, vp, false);
             ImageView imageView = view.findViewById(R.id.iv_topNewsPic);
-            Glide.with(mContext)
-                    .load(mContents.get(i).getImageUrl())
-                    .skipMemoryCache(false)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .into(imageView);
+            //防止在挂靠的Activity已被销毁的情况下使用Glide
+            if (!((MainActivity) mContext).isDestroyed()) {
+                Glide.with(mContext)
+                        .load(mContents.get(i).getImageUrl())
+                        .skipMemoryCache(true)
+                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                        .into(imageView);
+            }
             TextView textView = view.findViewById(R.id.tv_topNewsTitle);
             textView.setText(mContents.get(i).getTitle());
-            final int _i = i;
-            view.setOnClickListener((v) -> {
-//                Toast.makeText(mContext, mContents.get(position).getTitle(), Toast.LENGTH_SHORT).show();
-                if (((MainActivity) mContext).isNetworkConnected()) {
-                    Intent intent = new Intent(mContext, NewsContentActivity.class);
-                    intent.putExtra("id", mContents.get(_i).getId());
-                    mContext.startActivity(intent);
-                } else {
-                    Toast.makeText(mContext, "网络不可用", Toast.LENGTH_SHORT).show();
-                }
-            });
+            view.setOnClickListener(new OnPagerClickListener(mContext, mContents.get(i)));
             mViews.add(view);
         }
     }
 
+    //ViewPager点击事件
+    private static class OnPagerClickListener implements View.OnClickListener {
+
+        private Context context;
+        private NewsSummary summary;
+
+        public OnPagerClickListener(Context context, NewsSummary summary) {
+            this.context = context;
+            this.summary = summary;
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (context != null && summary != null) {
+                if (((MainActivity) context).isNetworkConnected()) {
+                    Intent intent = new Intent(context, NewsContentActivity.class);
+                    intent.putExtra("id", summary.getId());
+                    context.startActivity(intent);
+                } else {
+                    Toast.makeText(context, "网络不可用", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
 
     public void startTimingPageRoll() {
         if (timer == null) {
             timer = new Timer();
         }
         if (timerTask == null) {
-            timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    ((Activity) mContext).runOnUiThread(() -> {
-                        if (mContents.size() > 0 && !isLoading()) {
-//                            Toast.makeText(mContext, "测试", Toast.LENGTH_SHORT).show();
-                            //????????此时子线程执行update()，变量mContent改为0，会产生错误，但几率很小
-                            vp.setCurrentItem((vp.getCurrentItem() + 1) % mContents.size());
-                        }
-                    });
-                }
-            };
+            timerTask = new PagerTimerTask(this);
             timer.schedule(timerTask, 5000, 5000);
         }
     }
@@ -188,5 +170,29 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
     public void resetTimingPageRoll() {
         stopTimingPageRoll();
         startTimingPageRoll();
+    }
+
+    //定时滚动任务
+    private static class PagerTimerTask extends TimerTask {
+
+        private WeakReference<TopNewsSummaryPagerAdapter> ref;
+
+        public PagerTimerTask(TopNewsSummaryPagerAdapter adapter) {
+            this.ref = new WeakReference<TopNewsSummaryPagerAdapter>(adapter);
+        }
+
+        @Override
+        public void run() {
+            TopNewsSummaryPagerAdapter adapter = ref.get();
+            if (ref.get() != null) {
+                ((Activity) adapter.mContext).runOnUiThread(() -> {
+                    if (adapter.mContents.size() > 0 && !adapter.isLoading()) {
+//                            Toast.makeText(mContext, "测试", Toast.LENGTH_SHORT).show();
+                        //????????此时子线程执行update()，变量mContent改为0，会产生错误，但几率很小
+                        adapter.vp.setCurrentItem((adapter.vp.getCurrentItem() + 1) % adapter.mContents.size());
+                    }
+                });
+            }
+        }
     }
 }
