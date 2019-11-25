@@ -1,4 +1,4 @@
-package com.sion.zhdaily.presenters;
+package com.sion.zhdaily.helpers;
 
 import com.sion.zhdaily.models.NewsSummariesUtil;
 import com.sion.zhdaily.models.beans.NewsSummary;
@@ -112,24 +112,42 @@ public class NewsSummariesHelper {
     //更新新闻列表
     //成功返回true，失败返回false
     public boolean update() {
+        //重置加载信息
+        isTodayNewsSummariesLoaded = false;
+        currentLoadedNewsSummariesDate = new Date();
+        currentLoadedNewsSummariesDateString = dateToString(currentLoadedNewsSummariesDate);
+        insertRangeStartPosition = 0;
+        loadedNewsSummaryNum = 0;
+        topNewsSummariesList.clear();
+        newsSummariesList.clear();
+        //防止刷新时向下滚动列表出错，在清空数据源后同步RecyclerView和PagerAdapter的数据源
+        updateDataSetInterface.updateDataSet();
         //更新最新和头条新闻共用的Json
         if (NewsSummariesUtil.updateTodayNewsSummariesJson()) {
-            //重置加载信息
-            isTodayNewsSummariesLoaded = false;
-            currentLoadedNewsSummariesDate = new Date();
-            currentLoadedNewsSummariesDateString = dateToString(currentLoadedNewsSummariesDate);
-            insertRangeStartPosition = 0;
-            loadedNewsSummaryNum = 0;
-            topNewsSummariesList.clear();
-            newsSummariesList.clear();
             //获取头条和最新新闻列表
             getNewsSummariesDayByDay();
             getNewsSummariesDayByDay();
+            updateDataSetInterface.updateDataSet();
             return true;
         }
         return false;
     }
 
-    //更新视图接口
+    //同步数据源接口
+    //防止刷新时向下滚动列表出错
+    @FunctionalInterface
+    public interface IUpdateDataSet {
+        void updateDataSet();
+    }
 
+    private IUpdateDataSet updateDataSetInterface;
+
+    public void setUpdateDataSetInterface(IUpdateDataSet updateDataSetInterface) {
+        this.updateDataSetInterface = updateDataSetInterface;
+    }
+
+    //有数据添加时同步数据源接口
+    public interface IInsertDataSet {
+        void insertDataSet();
+    }
 }

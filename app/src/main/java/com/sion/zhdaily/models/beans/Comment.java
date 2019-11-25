@@ -3,6 +3,10 @@ package com.sion.zhdaily.models.beans;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class Comment {
     //作者
     private String author;
@@ -16,6 +20,7 @@ public class Comment {
     private int likes;
     //评论时间
     private long time;
+    private String timeStr;
     //所回复消息内容
     private String replyContent;
     //所回复消息状态
@@ -26,6 +31,8 @@ public class Comment {
     private String replyAuthor;
     //错误代码
     private String errMsg;
+    //是否点赞
+    private boolean isLiked;
 
     public String getAuthor() {
         return author;
@@ -115,6 +122,22 @@ public class Comment {
         this.errMsg = errMsg;
     }
 
+    public boolean isLiked() {
+        return isLiked;
+    }
+
+    public void setLiked(boolean liked) {
+        isLiked = liked;
+    }
+
+    public String getTimeStr() {
+        return timeStr;
+    }
+
+    public void setTimeStr(String timeStr) {
+        this.timeStr = timeStr;
+    }
+
     public Comment(JSONObject object) {
         try {
             this.author = object.getString("author");
@@ -123,6 +146,7 @@ public class Comment {
             this.id = object.getInt("id");
             this.likes = object.getInt("likes");
             this.time = object.getLong("time");
+            this.timeStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINESE).format(new Date(this.time * 1000));
 
             if (object.has("reply_to")) {
                 JSONObject replyObject = object.getJSONObject("reply_to");

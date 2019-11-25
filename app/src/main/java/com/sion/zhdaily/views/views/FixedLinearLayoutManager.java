@@ -2,6 +2,7 @@ package com.sion.zhdaily.views.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,6 +25,7 @@ public class FixedLinearLayoutManager extends LinearLayoutManager {
         try {
             super.onLayoutChildren(recycler, state);
         } catch (IndexOutOfBoundsException e) {
+            Log.e("FixedLinearLayoutManager", "Data source do not match RecyclerView");
             e.printStackTrace();
         }
     }

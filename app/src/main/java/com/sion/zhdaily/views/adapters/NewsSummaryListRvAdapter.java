@@ -12,11 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
 import com.sion.zhdaily.views.activities.NewsContentActivity;
+import com.sion.zhdaily.views.views.NewsSummaryItemDecoration;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
 import java.util.List;
@@ -65,6 +65,22 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         this.mRv = mRv;
         this.mContents = mContents;
         this.mHeaderView = headerView;
+        mRv.addItemDecoration(new NewsSummaryItemDecoration(new NewsSummaryItemDecoration.DecorationCallback() {
+            @Override
+            public boolean isFirstInGroup(int pos) {
+                int realPos = getRealPosition(pos);
+                if (realPos < 0 || realPos >= mContents.size()) {
+                    return false;
+                } else {
+                    return mContents.get(realPos).isFirstNewsSummary();
+                }
+            }
+
+            @Override
+            public String getTitleText(int pos) {
+                return mContents.get(getRealPosition(pos)).getDateStr();
+            }
+        }, mainActivity));
         //setOnVisibleItemMoveToTopListener
         //限定此类中所定义接口的使用条件
         mRv.setVisibleItemMoveToTopListener((pos) -> {
@@ -97,32 +113,33 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == ITEM_TYPE.NORMAL.ordinal()) {
             int realPosition = getRealPosition(position);
+            NewsSummary summary = mContents.get(realPosition);
             NewsSummaryViewHolder newsSummaryViewHolder = (NewsSummaryViewHolder) holder;
             TextView textViewNewsTitle = newsSummaryViewHolder.getTvNewsTitle();
-            textViewNewsTitle.setText(mContents.get(realPosition).getTitle());
+            textViewNewsTitle.setText(summary.getTitle());
 
             ImageView imageView = newsSummaryViewHolder.getIvNewsTitlePic();
             //防止在挂靠的Activity已被销毁的情况下使用Glide
             if (!mainActivity.isDestroyed()) {
                 Glide.with(mainActivity)
-                        .load(mContents.get(realPosition).getImageUrl())
-                        .skipMemoryCache(false)
-                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                        .load(summary.getImageUrl())
+//                        .skipMemoryCache(false)
+//                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                         .into(imageView);
             }
             View clickableView = newsSummaryViewHolder.getClickableView();
             clickableView.setTag(realPosition);
-            clickableView.setOnClickListener(onClickListener);
+//            clickableView.setOnClickListener(onClickListener);
             //某天的第一条新闻要显示日期
-            if (mContents.get(realPosition).isFirstNewsSummary()) {
-                newsSummaryViewHolder.getTvNewsDate().setVisibility(View.VISIBLE);
-                newsSummaryViewHolder.getTvNewsDate().setText(mContents.get(realPosition).getDateStr());
-            }
+//            if (summary.isFirstNewsSummary()) {
+//                newsSummaryViewHolder.getTvNewsDate().setVisibility(View.VISIBLE);
+//                newsSummaryViewHolder.getTvNewsDate().setText(summary.getDateStr());
+//            }
             //移出的View会直接重用，所以移出的显示日期的View在重用之后也还会显示之前的日期，要在这种情况下设置不显示
-            else {
-                newsSummaryViewHolder.getTvNewsDate().setVisibility(View.GONE);
-                newsSummaryViewHolder.getTvNewsDate().setText(null);
-            }
+//            else {
+//                newsSummaryViewHolder.getTvNewsDate().setVisibility(View.GONE);
+//                newsSummaryViewHolder.getTvNewsDate().setText(null);
+//            }
         }
     }
 
@@ -137,6 +154,17 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             Toast.makeText(mainActivity, "网络不可用", Toast.LENGTH_SHORT).show();
         }
     };
+
+    @Override
+    public void onViewRecycled(@NonNull RecyclerView.ViewHolder holder) {
+        if (holder instanceof NewsSummaryViewHolder) {
+            //移出的View会直接重用，所以移出的显示日期的View在重用之后也还会显示之前的日期，要在这种情况下设置不显示
+            NewsSummaryViewHolder newsSummaryViewHolder = (NewsSummaryViewHolder) holder;
+//            newsSummaryViewHolder.getTvNewsDate().setVisibility(View.GONE);
+//            newsSummaryViewHolder.getTvNewsDate().setText(null);
+        }
+        super.onViewRecycled(holder);
+    }
 
     @Override
     public int getItemViewType(int position) {
@@ -218,12 +246,12 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     //ViewHolder
 
     //普通item
-    class NewsSummaryViewHolder extends RecyclerView.ViewHolder {
+    private class NewsSummaryViewHolder extends RecyclerView.ViewHolder {
 
         private View itemView;
         private TextView tvNewsTitle;
         private ImageView ivNewsTitlePic;
-        private TextView tvNewsDate;
+        //        private TextView tvNewsDate;
         private View clickableView;
 
         public View getItemView() {
@@ -246,13 +274,13 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             return ivNewsTitlePic;
         }
 
-        public TextView getTvNewsDate() {
-            return tvNewsDate;
-        }
+//        public TextView getTvNewsDate() {
+//            return tvNewsDate;
+//        }
 
-        public void setTvNewsDate(TextView tvNewsDate) {
-            this.tvNewsDate = tvNewsDate;
-        }
+//        public void setTvNewsDate(TextView tvNewsDate) {
+//            this.tvNewsDate = tvNewsDate;
+//        }
 
         public void setIvNewsTitlePic(ImageView ivNewsTitlePic) {
             this.ivNewsTitlePic = ivNewsTitlePic;
@@ -271,13 +299,14 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             this.itemView = itemView;
             this.tvNewsTitle = itemView.findViewById(R.id.tv_newsTitle);
             this.ivNewsTitlePic = itemView.findViewById(R.id.iv_newsTitlePic);
-            this.tvNewsDate = itemView.findViewById(R.id.tv_newsDate);
+//            this.tvNewsDate = itemView.findViewById(R.id.tv_newsDate);
             this.clickableView = itemView.findViewById(R.id.clickable_view);
+            clickableView.setOnClickListener(onClickListener);
         }
     }
 
     //顶部轮播图
-    class HeaderViewHolder extends RecyclerView.ViewHolder {
+    private static class HeaderViewHolder extends RecyclerView.ViewHolder {
 
         private View itemView;
 
@@ -291,6 +320,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
 
         public HeaderViewHolder(@NonNull View itemView) {
             super(itemView);
+            this.itemView = itemView;
         }
     }
 }

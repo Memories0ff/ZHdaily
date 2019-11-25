@@ -13,11 +13,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".views.activities.CommentsActivity"></activity>
+        <activity
+            android:name=".views.activities.CommentsActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".views.activities.NewsContentActivity"
-            android:label="@string/title_activity_news_content" />
-        <activity android:name=".views.activities.MainActivity">
+            android:label="@string/title_activity_news_content"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".views.activities.MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

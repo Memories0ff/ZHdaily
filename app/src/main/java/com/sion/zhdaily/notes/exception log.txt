@@ -1,0 +1,42 @@
+E/AndroidRuntime: FATAL EXCEPTION: main
+    Process: com.sion.zhdaily, PID: 20166
+    java.lang.IndexOutOfBoundsException: Index: 11, Size: 0
+        at java.util.ArrayList.get(ArrayList.java:437)
+        at com.sion.zhdaily.views.activities.MainActivity.lambda$onCreate$4$MainActivity(MainActivity.java:113)
+        at com.sion.zhdaily.views.activities.-$$Lambda$MainActivity$z3oUG6rSr_rXxfKmSb2m2i4JFc4.itemMoveToTop(Unknown Source:2)
+        at com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter.lambda$new$0$NewsSummaryListRvAdapter(NewsSummaryListRvAdapter.java:80)
+        at com.sion.zhdaily.views.adapters.-$$Lambda$NewsSummaryListRvAdapter$qnTvs1aKQZL82Cv2-i8Ai5nbXlA.visibleItemMoveToTop(Unknown Source:2)
+        at com.sion.zhdaily.views.views.NewsSummaryListRecyclerView$1.onScrolled(NewsSummaryListRecyclerView.java:74)
+        at androidx.recyclerview.widget.RecyclerView.dispatchOnScrolled(RecyclerView.java:4961)
+        at androidx.recyclerview.widget.RecyclerView$ViewFlinger.run(RecyclerView.java:5117)
+        at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1050)
+        at android.view.Choreographer.doCallbacks(Choreographer.java:862)
+        at android.view.Choreographer.doFrame(Choreographer.java:794)
+        at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1036)
+        at android.os.Handler.handleCallback(Handler.java:874)
+        at android.os.Handler.dispatchMessage(Handler.java:100)
+        at android.os.Looper.loop(Looper.java:198)
+        at android.app.ActivityThread.main(ActivityThread.java:6729)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+I/Process: Sending signal. PID: 20166 SIG: 9
+
+E/AndroidRuntime: FATAL EXCEPTION: main
+    Process: com.sion.zhdaily, PID: 26069
+    java.lang.IllegalStateException: The application's PagerAdapter changed the adapter's contents without calling PagerAdapter#notifyDataSetChanged! Expected adapter item count: 5, found: 0 Pager id: com.sion.zhdaily:id/vp Pager class: class androidx.viewpager.widget.ViewPager Problematic adapter: class com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter
+        at androidx.viewpager.widget.ViewPager.populate(ViewPager.java:1143)
+        at androidx.viewpager.widget.ViewPager.populate(ViewPager.java:1092)
+        at androidx.viewpager.widget.ViewPager$3.run(ViewPager.java:273)
+        at android.view.Choreographer$CallbackRecord.run(Choreographer.java:1050)
+        at android.view.Choreographer.doCallbacks(Choreographer.java:862)
+        at android.view.Choreographer.doFrame(Choreographer.java:794)
+        at android.view.Choreographer$FrameDisplayEventReceiver.run(Choreographer.java:1036)
+        at android.os.Handler.handleCallback(Handler.java:874)
+        at android.os.Handler.dispatchMessage(Handler.java:100)
+        at android.os.Looper.loop(Looper.java:198)
+        at android.app.ActivityThread.main(ActivityThread.java:6729)
+        at java.lang.reflect.Method.invoke(Native Method)
+        at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:493)
+        at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:858)
+I/Process: Sending signal. PID: 26069 SIG: 9

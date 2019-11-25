@@ -1,7 +1,9 @@
 package com.sion.zhdaily.models;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.sion.zhdaily.helpers.DBHelper;
 import com.sion.zhdaily.models.beans.Comment;
 
 import org.json.JSONArray;
@@ -20,6 +22,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class CommentUtil {
+
     //beforeAuthorId为-1时加载最前面二十条评论，否则加载beforeAuthorId后面的二十条评论
     public static String getLongCommentsJson(int newsId, int beforeAuthorId) {
         Request.Builder builder = new Request.Builder();
@@ -88,7 +91,7 @@ public class CommentUtil {
     }
 
     //每次获取最多20个短评
-    public static List<Comment> getShortCommentByStep(int newsId, int beforeAuthorId) {
+    public static List<Comment> getShortCommentByStep(int newsId, int beforeAuthorId, Context context) {
         List<Comment> shortComments = new ArrayList<>();
 
         String shortCommentsJson = getShortCommentsJson(newsId, beforeAuthorId);
@@ -102,8 +105,13 @@ public class CommentUtil {
             if (size == 0) {
                 return shortComments;
             }
+            DBHelper dbHelper = new DBHelper(context);
             for (int i = 0; i < size; i++) {
-                shortComments.add(new Comment(array.getJSONObject(i)));
+                Comment comment = new Comment(array.getJSONObject(i));
+                if (dbHelper.findCommentLikeRecord(comment.getId(), comment.getTime())) {
+                    comment.setLiked(true);
+                }
+                shortComments.add(comment);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -112,7 +120,7 @@ public class CommentUtil {
     }
 
     //获取全部长评
-    public static List<Comment> getAllLongComments(int newsId) {
+    public static List<Comment> getAllLongComments(int newsId, Context context) {
         List<Comment> longComments = new ArrayList<>();
         boolean isFirstLoad = true;
         while (true) {
@@ -128,8 +136,13 @@ public class CommentUtil {
                 if (size == 0) {
                     break;
                 }
+                DBHelper dbHelper = new DBHelper(context);
                 for (int i = 0; i < size; i++) {
-                    longComments.add(new Comment(array.getJSONObject(i)));
+                    Comment comment = new Comment(array.getJSONObject(i));
+                    if (dbHelper.findCommentLikeRecord(comment.getId(), comment.getTime())) {
+                        comment.setLiked(true);
+                    }
+                    longComments.add(comment);
                 }
                 //最后一次加载则退出
                 if (size < 20) {
@@ -144,7 +157,7 @@ public class CommentUtil {
     }
 
     //获取全部短评
-    public static List<Comment> getAllShortComments(int newsId) {
+    public static List<Comment> getAllShortComments(int newsId, Context context) {
 
         List<Comment> shortComments = new ArrayList<>();
         boolean isFirstLoad = true;
@@ -161,8 +174,13 @@ public class CommentUtil {
                 if (size == 0) {
                     break;
                 }
+                DBHelper dbHelper = new DBHelper(context);
                 for (int i = 0; i < size; i++) {
-                    shortComments.add(new Comment(array.getJSONObject(i)));
+                    Comment comment = new Comment(array.getJSONObject(i));
+                    if (dbHelper.findCommentLikeRecord(comment.getId(), comment.getTime())) {
+                        comment.setLiked(true);
+                    }
+                    shortComments.add(comment);
                 }
                 //最后一次加载则退出
                 if (size < 20) {

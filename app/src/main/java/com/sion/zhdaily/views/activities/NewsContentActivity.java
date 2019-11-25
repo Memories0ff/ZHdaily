@@ -21,11 +21,14 @@ import android.widget.Toolbar;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
+import com.sion.zhdaily.helpers.DBHelper;
+import com.sion.zhdaily.helpers.NewsContentHelper;
 import com.sion.zhdaily.models.beans.NewsContent;
-import com.sion.zhdaily.presenters.NewsContentHelper;
 import com.sion.zhdaily.views.views.NewsContentNestedScrollView;
 
 public class NewsContentActivity extends Activity {
+
+    private int newsId;
 
     //网络状态
     private boolean isNetworkConnected = false;
@@ -48,7 +51,9 @@ public class NewsContentActivity extends Activity {
     LinearLayout llCommentsBtn = null;
     TextView tvCommentNum = null;
     //点赞按钮
+    boolean isLiked = false;
     LinearLayout llThumbBtn = null;
+    ImageView ivThumb = null;
     TextView tvPopularityNum = null;
     //分享按钮
     ImageView ivShareBtn = null;
@@ -64,6 +69,9 @@ public class NewsContentActivity extends Activity {
     //新闻内容显示
     NewsContentNestedScrollView nsvNewsContent = null;
     WebView wvNewsContent = null;
+
+    //数据库操作
+    DBHelper dbHelper = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +93,24 @@ public class NewsContentActivity extends Activity {
         tvCommentNum = findViewById(R.id.tv_commentsNum);
 
         llThumbBtn = findViewById(R.id.ll_thumbBtn);
+        ivThumb = findViewById(R.id.iv_thumb);
+        llThumbBtn.setOnClickListener((v) -> {
+            //点赞或取消点赞-------------
+            if (dbHelper != null) {
+                if (isLiked) {
+                    dbHelper.deleteNewsLikeRecord(newsId);
+                    ivThumb.setImageResource(R.mipmap.thumb_up_white_48);
+                    tvPopularityNum.setText("" + (Integer.parseInt(tvPopularityNum.getText().toString()) - 1));
+                    isLiked = false;
+                } else {
+                    dbHelper.insertNewsLikeRecord(newsId);
+                    ivThumb.setImageResource(R.mipmap.thumb_up_orange);
+                    tvPopularityNum.setText("" + (Integer.parseInt(tvPopularityNum.getText().toString()) + 1));
+                    isLiked = true;
+                }
+            }
+            //------------------------
+        });
         tvPopularityNum = findViewById(R.id.tv_popularityNum);
 
         ivShareBtn = findViewById(R.id.iv_newsContentShareBtn);
@@ -128,17 +154,27 @@ public class NewsContentActivity extends Activity {
 
         //获取从上个activity传来到数据
         Intent intent = getIntent();
-        int id = intent.getIntExtra("id", 0);
+        newsId = intent.getIntExtra("id", 0);
+        //从网络获取数据
         helper = new NewsContentHelper();
         new Thread(() -> {
             //下载新闻内容等数据
-            content = helper.getNewsContentById(id);
+            content = helper.getNewsContentById(newsId);
             runOnUiThread(() -> {
                 //防止在执行时Activity已经退出造成崩溃
                 try {
                     //显示这些数据
                     tvCommentNum.setText("" + content.getComments());
-                    tvPopularityNum.setText("" + content.getPopularity());
+                    //数据库操作
+                    dbHelper = new DBHelper(this);
+                    //查询到点赞记录则设为已点赞的状态
+                    if (dbHelper.findNewsLikeRecord(newsId)) {
+                        isLiked = true;
+                        ivThumb.setImageResource(R.mipmap.thumb_up_orange);
+                        tvPopularityNum.setText("" + (content.getPopularity() + 1));
+                    } else {
+                        tvPopularityNum.setText("" + content.getPopularity());
+                    }
 //                    异步加载，使用Glide加载前要判断挂靠的Activity是否已经销毁
                     if (!NewsContentActivity.this.isDestroyed()) {
                         Glide.with(NewsContentActivity.this)
@@ -177,7 +213,7 @@ public class NewsContentActivity extends Activity {
                             Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
                         }
                     });
-                    llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
+//                    llThumbBtn.setOnClickListener((v) -> Toast.makeText(this, "点赞", Toast.LENGTH_SHORT).show());
                     ivShareBtn.setOnClickListener((v) -> Toast.makeText(this, "分享", Toast.LENGTH_SHORT).show());
                     ivCollectBtn.setOnClickListener((v) -> Toast.makeText(this, "收藏", Toast.LENGTH_SHORT).show());
                 } catch (Exception e) {

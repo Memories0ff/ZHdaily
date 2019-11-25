@@ -35,6 +35,8 @@
         android:layout_height="25dp"
         android:layout_gravity="end"
         android:layout_marginEnd="15dp"
-        android:src="@mipmap/notification_white" />
+        android:background="@drawable/ripple_bg"
+        android:clickable="true"
+        android:src="@mipmap/notifications_white_48" />
 
 </Toolbar>

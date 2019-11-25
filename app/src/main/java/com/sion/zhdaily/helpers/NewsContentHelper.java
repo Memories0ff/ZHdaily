@@ -1,4 +1,4 @@
-package com.sion.zhdaily.presenters;
+package com.sion.zhdaily.helpers;
 
 import com.sion.zhdaily.models.NewsContentUtil;
 import com.sion.zhdaily.models.beans.NewsContent;

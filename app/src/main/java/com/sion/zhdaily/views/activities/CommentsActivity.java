@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.presenters.CommentHelper;
+import com.sion.zhdaily.helpers.CommentHelper;
 import com.sion.zhdaily.views.adapters.CommentRvAdapter;
 import com.sion.zhdaily.views.views.CommentRecyclerView;
 
@@ -60,13 +60,15 @@ public class CommentsActivity extends AppCompatActivity {
             isNetworkConnected = true;
         }
 
+        //从上个Activity获取信息
         newsId = getIntent().getIntExtra("newsId", 0);
         commentNum = getIntent().getIntExtra("commentNum", 0);
         longCommentNum = getIntent().getIntExtra("longCommentNum", 0);
         shortCommentNum = getIntent().getIntExtra("shortCommentNum", 0);
 
-        mHelper = new CommentHelper(newsId, longCommentNum, shortCommentNum);
+        mHelper = new CommentHelper(newsId, longCommentNum, shortCommentNum, this);
 
+        //设置界面
         tbComments = findViewById(R.id.tb_comments);
         tbComments.setTitle(commentNum + "条点评");
         tbComments.setNavigationOnClickListener((v) -> finish());

@@ -1,5 +1,8 @@
 package com.sion.zhdaily.views.adapters;
 
+import android.app.AlertDialog;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.text.SpannableString;
@@ -21,8 +24,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
+import com.sion.zhdaily.helpers.CommentHelper;
+import com.sion.zhdaily.helpers.DBHelper;
 import com.sion.zhdaily.models.beans.Comment;
-import com.sion.zhdaily.presenters.CommentHelper;
 import com.sion.zhdaily.views.activities.CommentsActivity;
 import com.sion.zhdaily.views.views.CommentRecyclerView;
 
@@ -41,6 +45,8 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
     private ArrayList<StateHolder> stateHolders = new ArrayList<>();
 
+    private DBHelper dbHelper;
+
     enum ITEMTYPE {
         COMMENT, LONG_GROUP_TITLE, SHORT_GROUP_TITLE, NONE_LONG_PLACEHOLDER
     }
@@ -50,6 +56,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         this.mActivity = mActivity;
         this.mRv = mRv;
         this.mHelper = mHelper;
+        this.dbHelper = new DBHelper(mActivity);
         this.mRv.setOnScrollToBottomListener(() -> {
             if (mActivity.isNetworkConnected()) {
                 if (isShortsCommentsExpanded && !isLoading) {
@@ -104,12 +111,57 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                 stateHolder = stateHolders.get(realPos);
             } else {
                 stateHolder = new StateHolder(stateHolders);
+                stateHolder.setLiked(comment.isLiked());
             }
 
 
             CommentVH commentVH = (CommentVH) holder;
 
-            commentVH.getLlPopCommentMenuBtn().setOnClickListener((v -> Toast.makeText(mActivity, "弹出菜单", Toast.LENGTH_SHORT).show()));
+
+            ImageView ivThumb = commentVH.getIvThumb();
+            if (stateHolder.isLiked()) {
+                ivThumb.setImageResource(R.mipmap.thumb_blue);
+                commentVH.getTvPopularityNum().setText("" + (comment.getLikes() + 1));
+            } else {
+                ivThumb.setImageResource(R.mipmap.thumb_gray);
+                commentVH.getTvPopularityNum().setText("" + comment.getLikes());
+            }
+
+
+            //点击弹出菜单
+            commentVH.getLlPopCommentMenuBtn().setOnClickListener((v -> {
+                final String[] itemsStr = {comment.isLiked() ? "取消赞同" : "赞同", "举报", "复制", "回复"};
+                AlertDialog.Builder listDialog = new AlertDialog.Builder(mActivity);
+                listDialog.setItems(itemsStr, (dialog, which) -> {
+                    switch (which) {
+                        case 0:
+                            if ("赞同".equals(itemsStr[which])) {
+                                dbHelper.insertCommentLikeRecord(comment.getId(), comment.getTime());
+                                ivThumb.setImageResource(R.mipmap.thumb_blue);
+                                commentVH.getTvPopularityNum().setText("" + (comment.getLikes() + 1));
+                                comment.setLiked(true);
+                            } else {
+                                dbHelper.deleteCommentLikeRecord(comment.getId(), comment.getTime());
+                                ivThumb.setImageResource(R.mipmap.thumb_gray);
+                                commentVH.getTvPopularityNum().setText("" + comment.getLikes());
+                                comment.setLiked(false);
+                            }
+                            break;
+                        case 1:
+                            Toast.makeText(mActivity, "举报", Toast.LENGTH_SHORT).show();
+                            break;
+                        case 2:
+                            ClipboardManager cm = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
+                            cm.setText(comment.getContent().trim());
+                            Toast.makeText(mActivity, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                            break;
+                        case 3:
+                            Toast.makeText(mActivity, "回复", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                });
+                listDialog.show();
+            }));
 
             //防止在挂靠的Activity已被销毁的情况下使用Glide
             if (!mActivity.isDestroyed()) {
@@ -122,14 +174,6 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
             commentVH.getTvAuthor().setText(comment.getAuthor());
 
-            ImageView ivThumb = commentVH.getIvThumb();
-            if (stateHolder.isLiked()) {
-                ivThumb.setImageResource(R.mipmap.thumb_blue);
-            } else {
-                ivThumb.setImageResource(R.mipmap.thumb_gray);
-            }
-
-            commentVH.getTvPopularityNum().setText("" + comment.getLikes());
 
             commentVH.getTvComment().setText(comment.getContent());
 
@@ -219,7 +263,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             }
 
 
-            commentVH.getTvTime().setText("" + comment.getTime());
+            commentVH.getTvTime().setText("" + comment.getTimeStr());
 
             stateHolder.setFirstCreated(false);
         } else if (getItemViewType(position) == ITEMTYPE.LONG_GROUP_TITLE.ordinal()) {
@@ -458,7 +502,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         private boolean isLiked = false;
         private boolean isFirstCreated = true;
 
-        private ArrayList<StateHolder> stateHolders = new ArrayList<>();
+        private ArrayList<StateHolder> stateHolders = null;
 
         public boolean isHasReply() {
             return hasReply;
