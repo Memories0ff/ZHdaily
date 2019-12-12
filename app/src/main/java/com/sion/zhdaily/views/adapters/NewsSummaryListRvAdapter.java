@@ -1,6 +1,7 @@
 package com.sion.zhdaily.views.adapters;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +20,8 @@ import com.sion.zhdaily.views.activities.NewsContentActivity;
 import com.sion.zhdaily.views.views.NewsSummaryItemDecoration;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
-import java.util.List;
+import java.io.Serializable;
+import java.util.ArrayList;
 
 public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -32,7 +34,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     //对应的RecyclerView
     public NewsSummaryListRecyclerView mRv;
     //数据源
-    public List<NewsSummary> mContents;
+    public ArrayList<NewsSummary> mSummaries;
     //列表头部
     private View mHeaderView = null;
 
@@ -56,29 +58,29 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
         isLoading = loading;
     }
 
-    public NewsSummaryListRvAdapter(MainActivity mainActivity, NewsSummaryListRecyclerView mRv, List<NewsSummary> mContents) {
-        this(mainActivity, mRv, mContents, null);
+    public NewsSummaryListRvAdapter(MainActivity mainActivity, NewsSummaryListRecyclerView mRv, ArrayList<NewsSummary> mSummaries) {
+        this(mainActivity, mRv, mSummaries, null);
     }
 
-    public NewsSummaryListRvAdapter(MainActivity mainActivity, NewsSummaryListRecyclerView mRv, List<NewsSummary> mContents, View headerView) {
+    public NewsSummaryListRvAdapter(MainActivity mainActivity, NewsSummaryListRecyclerView mRv, ArrayList<NewsSummary> mSummaries, View headerView) {
         this.mainActivity = mainActivity;
         this.mRv = mRv;
-        this.mContents = mContents;
+        this.mSummaries = mSummaries;
         this.mHeaderView = headerView;
         mRv.addItemDecoration(new NewsSummaryItemDecoration(new NewsSummaryItemDecoration.DecorationCallback() {
             @Override
             public boolean isFirstInGroup(int pos) {
                 int realPos = getRealPosition(pos);
-                if (realPos < 0 || realPos >= mContents.size()) {
+                if (realPos < 0 || realPos >= mSummaries.size()) {
                     return false;
                 } else {
-                    return mContents.get(realPos).isFirstNewsSummary();
+                    return mSummaries.get(realPos).isFirstNewsSummary();
                 }
             }
 
             @Override
             public String getTitleText(int pos) {
-                return mContents.get(getRealPosition(pos)).getDateStr();
+                return mSummaries.get(getRealPosition(pos)).getDateStr();
             }
         }, mainActivity));
         //setOnVisibleItemMoveToTopListener
@@ -113,7 +115,7 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == ITEM_TYPE.NORMAL.ordinal()) {
             int realPosition = getRealPosition(position);
-            NewsSummary summary = mContents.get(realPosition);
+            NewsSummary summary = mSummaries.get(realPosition);
             NewsSummaryViewHolder newsSummaryViewHolder = (NewsSummaryViewHolder) holder;
             TextView textViewNewsTitle = newsSummaryViewHolder.getTvNewsTitle();
             textViewNewsTitle.setText(summary.getTitle());
@@ -122,10 +124,10 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
             //防止在挂靠的Activity已被销毁的情况下使用Glide
             if (!mainActivity.isDestroyed()) {
                 Glide.with(mainActivity)
-                        .load(summary.getImageUrl())
+                    .load(summary.getImageUrl())
 //                        .skipMemoryCache(false)
 //                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                        .into(imageView);
+                    .into(imageView);
             }
             View clickableView = newsSummaryViewHolder.getClickableView();
             clickableView.setTag(realPosition);
@@ -145,10 +147,15 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
 
     //列表项点击事件
     private View.OnClickListener onClickListener = (v) -> {
-//                Toast.makeText(mainActivity, mContents.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show();
-        if (mainActivity.isNetworkConnected()) {
+//                Toast.makeText(mainActivity, mSummaries.get(realPosition).getTitle(), Toast.LENGTH_SHORT).show();
+        if (mainActivity.getPresenter().isNetworkConnected()) {
             Intent intent = new Intent(mainActivity, NewsContentActivity.class);
-            intent.putExtra("id", mContents.get((int) v.getTag()).getId());
+            intent.putExtra("id", mSummaries.get((int) v.getTag()).getId());
+            intent.putExtra("index", (int) v.getTag());
+            intent.putExtra("newsNum", mSummaries.size());
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("newsSummariesList", (Serializable) mSummaries);
+            intent.putExtras(bundle);
             mainActivity.startActivity(intent);
         } else {
             Toast.makeText(mainActivity, "网络不可用", Toast.LENGTH_SHORT).show();
@@ -182,16 +189,16 @@ public class NewsSummaryListRvAdapter extends RecyclerView.Adapter<RecyclerView.
     @Override
     public int getItemCount() {
         if (mHeaderView == null) {
-            if (mContents == null) {
+            if (mSummaries == null) {
                 return 0;
             } else {
-                return mContents.size();
+                return mSummaries.size();
             }
         } else {
-            if (mContents == null) {
+            if (mSummaries == null) {
                 return 1;
             } else {
-                return mContents.size() + 1;
+                return mSummaries.size() + 1;
             }
         }
     }

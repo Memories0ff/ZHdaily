@@ -1,11 +1,5 @@
 package com.sion.zhdaily.views.activities;
 
-import android.app.Activity;
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkInfo;
-import android.net.NetworkRequest;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -19,18 +13,20 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.helpers.NewsSummariesHelper;
+import com.sion.zhdaily.models.beans.NewsSummary;
+import com.sion.zhdaily.mvp.presenters.MainPresenter;
+import com.sion.zhdaily.mvp.views.IMainView;
+import com.sion.zhdaily.utils.base.BaseActivity;
 import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
 import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
 import com.sion.zhdaily.views.views.FixedLinearLayoutManager;
 import com.sion.zhdaily.views.views.NewsSummaryListRecyclerView;
 
+import java.util.ArrayList;
 
-public class MainActivity extends Activity {
 
-    private boolean isNetworkConnected = false;
-    private ConnectivityManager connMgr = null;
-    private NetworkCallbackImpl networkCallback = new NetworkCallbackImpl();
+public class MainActivity extends BaseActivity<IMainView, MainPresenter> implements IMainView {
+
 
     NewsSummaryListRecyclerView rv = null;
     NewsSummaryListRvAdapter rvAdapter = null;
@@ -47,33 +43,21 @@ public class MainActivity extends Activity {
 
     SwipeRefreshLayout srl = null;
 
-    public NewsSummariesHelper helper = new NewsSummariesHelper();
-
-
-    public boolean isNetworkConnected() {
-        return isNetworkConnected;
-    }
+    //---------------------------------Activity方法---------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //网络状态
-        connMgr = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-        connMgr.registerNetworkCallback(new NetworkRequest.Builder().build(), networkCallback);
-        NetworkInfo info = connMgr.getActiveNetworkInfo();
-        if (info != null && info.isConnected()) {
-            isNetworkConnected = true;
-        }
+        getPresenter().registerConnMgr();
 
         //设置DrawerLayout
         dl = findViewById(R.id.dl);
         flToIndexBtn = findViewById(R.id.fl_toIndex);
         flToIndexBtn.setOnClickListener((v) -> {
-            dl.closeDrawer(Gravity.LEFT);
-            srl.setRefreshing(true);
-            update();
+            uiSwitchToLoading(false);
+            getPresenter().update();
         });
 
         //设置标题栏
@@ -98,111 +82,37 @@ public class MainActivity extends Activity {
 
         //下拉刷新
         srl = findViewById(R.id.srl_update);
-        srl.setOnRefreshListener(refreshListener);
+        srl.setOnRefreshListener(() -> {
+            if (!rvAdapter.isLoading()) {
+                getPresenter().update();
+            }
+        });
 
 
         //设置显示新闻的ViewPager轮播图和对应adapter
         headerView = getLayoutInflater().inflate(R.layout.rv_summary_header_view, null, false);
         vpTopNews = headerView.findViewById(R.id.vp);
-        pagerAdapter = new TopNewsSummaryPagerAdapter(this, vpTopNews, helper.topNewsSummariesList);
+        pagerAdapter = new TopNewsSummaryPagerAdapter(this, vpTopNews, (ArrayList<NewsSummary>) getPresenter().getTopNewsDataSource());
         vpTopNews.setAdapter(pagerAdapter);
         vpTopNews.setOffscreenPageLimit(1);
 
-        //设置显示新闻的RecycyerView和对应adapter
+        //设置显示新闻的RecyclerView和对应adapter
         rv = findViewById(R.id.rv);
         //数据更新时不可滑动
-        rv.setOnTouchListener((view, motionEvent) -> isLoading());
+        rv.setOnTouchListener((view, motionEvent) -> srl.isRefreshing());
         FixedLinearLayoutManager fixedLinearLayoutManager = new FixedLinearLayoutManager(this);
         fixedLinearLayoutManager.setItemPrefetchEnabled(false);
         rv.setLayoutManager(fixedLinearLayoutManager);
-        rvAdapter = new NewsSummaryListRvAdapter(this, rv, helper.newsSummariesList, headerView);
+        rvAdapter = new NewsSummaryListRvAdapter(this, rv, getPresenter().getSummariesDataSource(), headerView);
         rvAdapter.setOnTopViewPagerMoveToTopListener(() -> tbTvTitle.setText("首页"));
         rvAdapter.setOnItemMoveToTopListener((pos) -> {
-            tbTvTitle.setText(helper.newsSummariesList.get(pos).getDateStr());
+            tbTvTitle.setText(getPresenter().getSummariesDataSource().get(pos).getDateStr());
         });
         rv.setAdapter(rvAdapter);
-        //防止刷新时向下滚动列表出错
-        helper.setUpdateDataSetInterface(() -> runOnUiThread(() -> {
-            pagerAdapter.notifyDataSetChanged();
-            rvAdapter.notifyDataSetChanged();
-        }));
 
-        //从网络下载数据并显示
-        if (isNetworkConnected) {
-            pagerAdapter.setLoading(true);
-            rvAdapter.setLoading(true);
-            srl.setRefreshing(true);
-            new Thread(() -> {
-                //加载三天
-                helper.getNewsSummariesDayByDay();
-                runOnUiThread(() -> {
-                    pagerAdapter.notifyDataSetChanged();
-                    pagerAdapter.setLoading(false);
-                    pagerAdapter.startTimingPageRoll();
-                    rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
-                });
-                helper.getNewsSummariesDayByDay();
-                runOnUiThread(() -> {
-                    rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
-                });
-                helper.getNewsSummariesDayByDay();
-                runOnUiThread(() -> {
-                    rvAdapter.notifyNewsSummaryItemInserted(helper.insertRangeStartPosition, helper.loadedNewsSummaryNum);
-                    srl.setRefreshing(false);
-                    rvAdapter.setLoading(false);
-                });
-            }).start();
-        }
+        getPresenter().loadInitialData();
+
     }
-
-    private SwipeRefreshLayout.OnRefreshListener refreshListener = () -> {
-        srl.setRefreshing(true);
-        update();
-    };
-
-
-    private void update() {
-        if (isNetworkConnected) {
-            new Thread(updateSummary).start();
-        } else {
-            Toast.makeText(this, "网络不可用", Toast.LENGTH_SHORT).show();
-            srl.setRefreshing(false);
-        }
-    }
-
-    //更新新闻列表操作Runnable
-    private Runnable updateSummary = () -> {
-        pagerAdapter.setLoading(true);
-        pagerAdapter.stopTimingPageRoll();
-        rvAdapter.setLoading(true);
-        if (helper.update()) {
-            runOnUiThread(() -> {
-                rvAdapter.notifyDataSetChanged();
-                rvAdapter.setLoading(false);
-
-                pagerAdapter.notifyDataSetChanged();
-                //轮播图设为初始位置
-                vpTopNews.setCurrentItem(0);
-                pagerAdapter.setLoading(false);
-                pagerAdapter.startTimingPageRoll();
-
-                Toast.makeText(MainActivity.this, "更新完成", Toast.LENGTH_SHORT).show();
-                if (dl.isDrawerOpen(Gravity.LEFT)) {
-                    dl.closeDrawer(Gravity.LEFT);
-                }
-                srl.setRefreshing(false);
-            });
-        } else {
-            pagerAdapter.setLoading(false);
-            pagerAdapter.startTimingPageRoll();
-            rvAdapter.setLoading(false);
-            runOnUiThread(() -> {
-                Toast.makeText(MainActivity.this, "加载失败", Toast.LENGTH_SHORT).show();
-                srl.setRefreshing(false);
-            });
-//                pagerAdapter.startTimingPageRoll();
-        }
-    };
 
     @Override
     public void onBackPressed() {
@@ -234,28 +144,68 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        getPresenter().unRegisterConnMgr();
         super.onDestroy();
-        connMgr.unregisterNetworkCallback(networkCallback);
     }
 
-    class NetworkCallbackImpl extends ConnectivityManager.NetworkCallback {
-        @Override
-        public void onAvailable(Network network) {
-            super.onAvailable(network);
-            isNetworkConnected = true;
-//            Toast.makeText(MainActivity.this, "网络已连接", Toast.LENGTH_SHORT).show();
+    //---------------------------------抽象类方法实现---------------------------------
+
+    @Override
+    protected IMainView createView() {
+        return this;
+    }
+
+    @Override
+    protected MainPresenter createPresenter() {
+        return new MainPresenter();
+    }
+
+    //---------------------------------IMainView接口方法---------------------------------
+    @Override
+    public void toast(String str) {
+        Toast.makeText(this, str, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void insertForSummaries() {
+        rvAdapter.notifyNewsSummaryItemInserted(getPresenter().getInsertRangeStartPosition(), getPresenter().getLoadedNewsSummaryNum());
+    }
+
+    @Override
+    public void updateForInsert() {
+        pagerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void updateForChangeAll() {
+        pagerAdapter.notifyDataSetChanged();
+        rvAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void uiSwitchToLoading(boolean isContinue) {
+        pagerAdapter.setLoading(true);
+        rvAdapter.setLoading(true);
+        if (!isContinue) {
+            srl.setRefreshing(true);
+            pagerAdapter.stopTimingPageRoll();
         }
-
-        @Override
-        public void onLost(Network network) {
-            super.onLost(network);
-            isNetworkConnected = false;
-//            Toast.makeText(MainActivity.this, "网络已断开", Toast.LENGTH_SHORT).show();
+        if (dl.isDrawerOpen(Gravity.LEFT)) {
+            dl.closeDrawer(Gravity.LEFT);
         }
     }
 
-    //是否正在加载中
-    public boolean isLoading() {
-        return srl.isRefreshing();
+    @Override
+    public void uiSwitchToNotLoading() {
+        //轮播图设为初始位置
+        vpTopNews.setCurrentItem(0);
+        pagerAdapter.setLoading(false);
+        pagerAdapter.startTimingPageRoll();
+        srl.setRefreshing(false);
+        rvAdapter.setLoading(false);
+        if (dl.isDrawerOpen(Gravity.LEFT)) {
+            dl.closeDrawer(Gravity.LEFT);
+        }
     }
+
 }

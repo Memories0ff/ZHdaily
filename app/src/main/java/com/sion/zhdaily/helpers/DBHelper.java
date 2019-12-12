@@ -19,8 +19,8 @@ public class DBHelper {
     public void insertCommentLikeRecord(int authorId, long commentTime) {
         SQLiteDatabase db = sqLiteOpenHelper.getWritableDatabase();
         db.execSQL(
-                "insert into " + ZHDailySQLiteOpenHelper.COMMENTS_LIKED_TABLE + "(authorId,commentTime)"
-                        + " values(" + authorId + "," + commentTime + ");"
+            "insert into " + ZHDailySQLiteOpenHelper.COMMENTS_LIKED_TABLE + "(authorId,commentTime)"
+                + " values(" + authorId + "," + commentTime + ");"
         );
         db.close();
     }
@@ -29,8 +29,8 @@ public class DBHelper {
     public void deleteCommentLikeRecord(int authorId, long commentTime) {
         SQLiteDatabase db = sqLiteOpenHelper.getWritableDatabase();
         db.execSQL(
-                "delete from " + ZHDailySQLiteOpenHelper.COMMENTS_LIKED_TABLE + " where authorId="
-                        + authorId + " and commentTime=" + commentTime + ";"
+            "delete from " + ZHDailySQLiteOpenHelper.COMMENTS_LIKED_TABLE + " where authorId="
+                + authorId + " and commentTime=" + commentTime + ";"
         );
         db.close();
     }
@@ -39,8 +39,8 @@ public class DBHelper {
     public boolean findCommentLikeRecord(int authorId, long commentTime) {
         SQLiteDatabase db = sqLiteOpenHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery(
-                "select count(*) from " + ZHDailySQLiteOpenHelper.COMMENTS_LIKED_TABLE
-                        + " where authorId=" + authorId + " and commentTime=" + commentTime + ";", null);
+            "select count(*) from " + ZHDailySQLiteOpenHelper.COMMENTS_LIKED_TABLE
+                + " where authorId=" + authorId + " and commentTime=" + commentTime + ";", null);
         cursor.moveToFirst();
         long result = cursor.getLong(0);
         cursor.close();
@@ -52,8 +52,8 @@ public class DBHelper {
     public void insertNewsLikeRecord(int newsId) {
         SQLiteDatabase db = sqLiteOpenHelper.getWritableDatabase();
         db.execSQL(
-                "insert into " + ZHDailySQLiteOpenHelper.NEWS_LIKED_TABLE + "(newsId)"
-                        + " values(" + newsId + ");"
+            "insert into " + ZHDailySQLiteOpenHelper.NEWS_LIKED_TABLE + "(newsId)"
+                + " values(" + newsId + ");"
         );
         db.close();
     }
@@ -62,8 +62,8 @@ public class DBHelper {
     public void deleteNewsLikeRecord(int newsId) {
         SQLiteDatabase db = sqLiteOpenHelper.getWritableDatabase();
         db.execSQL(
-                "delete from " + ZHDailySQLiteOpenHelper.NEWS_LIKED_TABLE + " where newsId="
-                        + newsId + ";"
+            "delete from " + ZHDailySQLiteOpenHelper.NEWS_LIKED_TABLE + " where newsId="
+                + newsId + ";"
         );
         db.close();
     }
@@ -72,7 +72,7 @@ public class DBHelper {
     public boolean findNewsLikeRecord(int newsId) {
         SQLiteDatabase db = sqLiteOpenHelper.getReadableDatabase();
         Cursor cursor = db.rawQuery("select count(*) from " + ZHDailySQLiteOpenHelper.NEWS_LIKED_TABLE
-                + " where newsId=" + newsId + ";", null);
+            + " where newsId=" + newsId + ";", null);
         cursor.moveToFirst();
         long result = cursor.getLong(0);
         cursor.close();
@@ -95,13 +95,13 @@ public class DBHelper {
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("create table if not exists " + COMMENTS_LIKED_TABLE + " (" +
-                    "authorId INTEGER," +
-                    "commentTime INTEGER," +
-                    "primary key (authorId,commentTime)" +
-                    ")");
+                "authorId INTEGER," +
+                "commentTime INTEGER," +
+                "primary key (authorId,commentTime)" +
+                ")");
             db.execSQL("create table if not exists " + NEWS_LIKED_TABLE + " (" +
-                    "newsId INTEGER primary key" +
-                    ")");
+                "newsId INTEGER primary key" +
+                ")");
         }
 
         @Override

@@ -15,14 +15,27 @@ public class CommentHelper {
     public int allNumOfLongComments = 0;
     public int allNumOfShortComments = 0;
 
-    public List<Comment> longComments = new ArrayList<>();
-    public List<Comment> shortComments = new ArrayList<>();
+    //数据源
+    private List<Comment> longComments = new ArrayList<>();
+    private List<Comment> shortComments = new ArrayList<>();
+
+    public List<Comment> getLongComments() {
+        return longComments;
+    }
+
+    public List<Comment> getShortComments() {
+        return shortComments;
+    }
 
     //新闻ID
     public int newsId = 0;
 
     //当前加载短评数
-    public int currentLoadedShortComments = 0;
+    private int currentLoadedShortComments = 0;
+
+    public int getCurrentLoadedShortComments() {
+        return currentLoadedShortComments;
+    }
 
     //短评加载过程是否完成
     private boolean isShortCommentsLoadOver = false;
@@ -50,7 +63,7 @@ public class CommentHelper {
         shortComments.addAll(CommentUtil.getAllShortComments(newsId, context));
     }
 
-    //单次加载最多20条评论
+    //单次加载最多20条短评
     public void obtainShortCommentsByStep() {
         if (isShortCommentsLoadOver) {
             return;

@@ -24,8 +24,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.helpers.CommentHelper;
-import com.sion.zhdaily.helpers.DBHelper;
 import com.sion.zhdaily.models.beans.Comment;
 import com.sion.zhdaily.views.activities.CommentsActivity;
 import com.sion.zhdaily.views.views.CommentRecyclerView;
@@ -37,41 +35,22 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
     private CommentsActivity mActivity;
     private CommentRecyclerView mRv;
-    private CommentHelper mHelper;
-    private boolean isLoading = false;
-    private boolean isShortsCommentsExpanded = false;
     //用于在首次加载过程中隐藏没有长评的提示图片，加载后如果没有长评则显示图片
     private NoneLongPlaceHolderVH noneLongPlaceHolderVH;
 
     private ArrayList<StateHolder> stateHolders = new ArrayList<>();
 
-    private DBHelper dbHelper;
 
     enum ITEMTYPE {
         COMMENT, LONG_GROUP_TITLE, SHORT_GROUP_TITLE, NONE_LONG_PLACEHOLDER
     }
 
 
-    public CommentRvAdapter(CommentsActivity mActivity, CommentRecyclerView mRv, CommentHelper mHelper) {
+    public CommentRvAdapter(CommentsActivity mActivity, CommentRecyclerView mRv) {
         this.mActivity = mActivity;
         this.mRv = mRv;
-        this.mHelper = mHelper;
-        this.dbHelper = new DBHelper(mActivity);
         this.mRv.setOnScrollToBottomListener(() -> {
-            if (mActivity.isNetworkConnected()) {
-                if (isShortsCommentsExpanded && !isLoading) {
-                    isLoading = true;
-                    new Thread(() -> {
-                        mHelper.obtainShortCommentsByStep();
-                        mActivity.runOnUiThread(() -> {
-                            notifyItemRangeInserted(2 + Math.max(1, mHelper.longComments.size()) + mHelper.shortComments.size(), mHelper.currentLoadedShortComments);
-                            isLoading = false;
-                        });
-                    }).start();
-                }
-            } else {
-                Toast.makeText(mActivity, "网络不可用", Toast.LENGTH_SHORT).show();
-            }
+            mActivity.getPresenter().continueLoading();
         });
     }
 
@@ -100,10 +79,10 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             int realPos = getCommentPosition(position);
 
             Comment comment;
-            if (realPos < mHelper.longComments.size()) {
-                comment = mHelper.longComments.get(realPos);
+            if (realPos < mActivity.getPresenter().getLongComments().size()) {
+                comment = mActivity.getPresenter().getLongComments().get(realPos);
             } else {
-                comment = mHelper.shortComments.get(realPos - mHelper.longComments.size());
+                comment = mActivity.getPresenter().getShortComments().get(realPos - mActivity.getPresenter().getLongComments().size());
             }
 
             StateHolder stateHolder;
@@ -136,27 +115,27 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                     switch (which) {
                         case 0:
                             if ("赞同".equals(itemsStr[which])) {
-                                dbHelper.insertCommentLikeRecord(comment.getId(), comment.getTime());
+                                mActivity.getPresenter().insertCommentLikeRecord(comment.getId(), comment.getTime());
                                 ivThumb.setImageResource(R.mipmap.thumb_blue);
                                 commentVH.getTvPopularityNum().setText("" + (comment.getLikes() + 1));
                                 comment.setLiked(true);
                             } else {
-                                dbHelper.deleteCommentLikeRecord(comment.getId(), comment.getTime());
+                                mActivity.getPresenter().deleteCommentLikeRecord(comment.getId(), comment.getTime());
                                 ivThumb.setImageResource(R.mipmap.thumb_gray);
                                 commentVH.getTvPopularityNum().setText("" + comment.getLikes());
                                 comment.setLiked(false);
                             }
                             break;
                         case 1:
-                            Toast.makeText(mActivity, "举报", Toast.LENGTH_SHORT).show();
+                            mActivity.toast("举报");
                             break;
                         case 2:
                             ClipboardManager cm = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
                             cm.setText(comment.getContent().trim());
-                            Toast.makeText(mActivity, "已复制到剪贴板", Toast.LENGTH_SHORT).show();
+                            mActivity.toast("已复制到剪贴板");
                             break;
                         case 3:
-                            Toast.makeText(mActivity, "回复", Toast.LENGTH_SHORT).show();
+                            mActivity.toast("回复");
                             break;
                     }
                 });
@@ -166,10 +145,10 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             //防止在挂靠的Activity已被销毁的情况下使用Glide
             if (!mActivity.isDestroyed()) {
                 Glide.with(mActivity)
-                        .load(comment.getAvatarUrl())
-                        .skipMemoryCache(false)
-                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                        .into(commentVH.getIvAuthorPic());
+                    .load(comment.getAvatarUrl())
+                    .skipMemoryCache(false)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .into(commentVH.getIvAuthorPic());
             }
 
             commentVH.getTvAuthor().setText(comment.getAuthor());
@@ -268,42 +247,42 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
             stateHolder.setFirstCreated(false);
         } else if (getItemViewType(position) == ITEMTYPE.LONG_GROUP_TITLE.ordinal()) {
             LongGroupTitleVH longGroupTitleVH = (LongGroupTitleVH) holder;
-            longGroupTitleVH.getTvLongCommentGroupTitle().setText(mHelper.allNumOfLongComments + "条长评");
+            longGroupTitleVH.getTvLongCommentGroupTitle().setText(mActivity.getPresenter().getLongCommentsNum() + "条长评");
         } else if (getItemViewType(position) == ITEMTYPE.SHORT_GROUP_TITLE.ordinal()) {
             ShortGroupTitleVH shortGroupTitleVH = (ShortGroupTitleVH) holder;
-            shortGroupTitleVH.getTvShortCommentGroupTitle().setText(mHelper.allNumOfShortComments + "条短评");
+            shortGroupTitleVH.getTvShortCommentGroupTitle().setText(mActivity.getPresenter().getShortCommentsNum() + "条短评");
             shortGroupTitleVH.getLlExpandBtn().setOnClickListener((v) -> {
-                if (mActivity.isNetworkConnected()) {
-                    if (!isShortsCommentsExpanded) {
-                        if (!isLoading) {
-                            isLoading = true;
+                if (mActivity.getPresenter().isNetworkConnected()) {
+                    if (!mActivity.getPresenter().isShortsCommentsExpanded()) {
+                        if (!mActivity.getPresenter().isLoading()) {
+                            mActivity.getPresenter().setLoading(true);
                             shortGroupTitleVH.getPbShortCommentsLoading().setVisibility(View.VISIBLE);
                             new Thread(() -> {
-                                mHelper.obtainShortCommentsByStep();
+                                mActivity.getPresenter().obtainShortCommentsByStep();
                                 ((CommentsActivity) v.getContext()).runOnUiThread(() -> {
                                     shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_less_black_48);
-                                    notifyItemRangeInserted(2 + Math.max(1, mHelper.longComments.size()), mHelper.currentLoadedShortComments);
+                                    notifyItemRangeInserted(2 + Math.max(1, mActivity.getPresenter().getLongComments().size()), mActivity.getPresenter().getCurrentLoadedShortComments());
                                     shortGroupTitleVH.getPbShortCommentsLoading().setVisibility(View.INVISIBLE);
-                                    isShortsCommentsExpanded = true;
-                                    isLoading = false;
+                                    mActivity.getPresenter().setShortsCommentsExpanded(true);
+                                    mActivity.getPresenter().setLoading(false);
                                 });
 
                             }).start();
                         }
                     } else {
-                        if (!isLoading) {
-                            notifyItemRangeRemoved(2 + Math.max(1, mHelper.longComments.size()), mHelper.shortComments.size());
-                            stateHolders.subList(mHelper.longComments.size(), stateHolders.size()).clear();
-                            mHelper.clearAllShortComments();
+                        if (!mActivity.getPresenter().isLoading()) {
+                            notifyItemRangeRemoved(2 + Math.max(1, mActivity.getPresenter().getLongComments().size()), mActivity.getPresenter().getShortComments().size());
+                            stateHolders.subList(mActivity.getPresenter().getLongComments().size(), stateHolders.size()).clear();
+                            mActivity.getPresenter().clearAllShortComments();
                             shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_more_black_48);
-                            isShortsCommentsExpanded = false;
+                            mActivity.getPresenter().setShortsCommentsExpanded(false);
                         }
                     }
                 } else {
                     Toast.makeText(mActivity, "网络不可用", Toast.LENGTH_SHORT).show();
                 }
             });
-            if (isShortsCommentsExpanded) {
+            if (mActivity.getPresenter().isShortsCommentsExpanded()) {
                 shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_less_black_48);
             } else {
                 shortGroupTitleVH.getIvExpandingPic().setImageResource(R.mipmap.unfold_more_black_48);
@@ -324,7 +303,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
     //在进入Activity后的加载中使用
     //在首次加载过程中隐藏没有长评的提示图片，加载后如果没有长评则显示图片
     public void notifyCommentSetChanged() {
-        if (mHelper.longComments.isEmpty()) {
+        if (mActivity.getPresenter().getLongComments().isEmpty()) {
             noneLongPlaceHolderVH.getLlNoneCommentPlaceholder().setVisibility(View.VISIBLE);
         }
         notifyDataSetChanged();
@@ -332,7 +311,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemCount() {
-        return 2 + Math.max(mHelper.longComments.size(), 1) + mHelper.shortComments.size();
+        return 2 + Math.max(mActivity.getPresenter().getLongComments().size(), 1) + mActivity.getPresenter().getShortComments().size();
     }
 
     @Override
@@ -340,7 +319,7 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
         if (position == 0) {
             return ITEMTYPE.LONG_GROUP_TITLE.ordinal();
         }
-        if (mHelper.longComments.isEmpty()) {
+        if (mActivity.getPresenter().getLongComments().isEmpty()) {
             if (position == 1) {
                 return ITEMTYPE.NONE_LONG_PLACEHOLDER.ordinal();
             } else if (position == 2) {
@@ -349,9 +328,9 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
                 return ITEMTYPE.COMMENT.ordinal();
             }
         } else {
-            if (position <= mHelper.longComments.size()) {
+            if (position <= mActivity.getPresenter().getLongComments().size()) {
                 return ITEMTYPE.COMMENT.ordinal();
-            } else if (position == mHelper.longComments.size() + 1) {
+            } else if (position == mActivity.getPresenter().getLongComments().size() + 1) {
                 return ITEMTYPE.SHORT_GROUP_TITLE.ordinal();
             } else {
                 return ITEMTYPE.COMMENT.ordinal();
@@ -360,10 +339,10 @@ public class CommentRvAdapter extends RecyclerView.Adapter {
     }
 
     private int getCommentPosition(int position) {
-        if (position - 1 <= Math.max(1, mHelper.longComments.size())) {
+        if (position - 1 <= Math.max(1, mActivity.getPresenter().getLongComments().size())) {
             return position - 1;
         } else {
-            return position - (mHelper.longComments.isEmpty() ? 3 : 2);
+            return position - (mActivity.getPresenter().getLongComments().isEmpty() ? 3 : 2);
         }
     }
 

@@ -25,9 +25,9 @@ public class NewsSummariesHelper {
 //    public int latestNewsNum;
 
     //头条新闻列表
-    public List<NewsSummary> topNewsSummariesList = new ArrayList<>();
+    public ArrayList<NewsSummary> topNewsSummariesList = new ArrayList<>();
     //其他非头条新闻列表
-    public List<NewsSummary> newsSummariesList = new ArrayList<>();
+    public ArrayList<NewsSummary> newsSummariesList = new ArrayList<>();
 
     //加载了多少天的新闻
 //    public int loadedDays = 0;
@@ -121,33 +121,16 @@ public class NewsSummariesHelper {
         topNewsSummariesList.clear();
         newsSummariesList.clear();
         //防止刷新时向下滚动列表出错，在清空数据源后同步RecyclerView和PagerAdapter的数据源
-        updateDataSetInterface.updateDataSet();
+//        updateDataSetInterface.updateDataSet();
         //更新最新和头条新闻共用的Json
         if (NewsSummariesUtil.updateTodayNewsSummariesJson()) {
             //获取头条和最新新闻列表
             getNewsSummariesDayByDay();
             getNewsSummariesDayByDay();
-            updateDataSetInterface.updateDataSet();
+//            updateDataSetInterface.updateDataSet();
             return true;
         }
         return false;
     }
 
-    //同步数据源接口
-    //防止刷新时向下滚动列表出错
-    @FunctionalInterface
-    public interface IUpdateDataSet {
-        void updateDataSet();
-    }
-
-    private IUpdateDataSet updateDataSetInterface;
-
-    public void setUpdateDataSetInterface(IUpdateDataSet updateDataSetInterface) {
-        this.updateDataSetInterface = updateDataSetInterface;
-    }
-
-    //有数据添加时同步数据源接口
-    public interface IInsertDataSet {
-        void insertDataSet();
-    }
 }

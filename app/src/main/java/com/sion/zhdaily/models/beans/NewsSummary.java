@@ -6,7 +6,9 @@ import androidx.annotation.NonNull;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class NewsSummary {
+import java.io.Serializable;
+
+public class NewsSummary implements Serializable {
     //新闻ID
     private int id;
     //标题

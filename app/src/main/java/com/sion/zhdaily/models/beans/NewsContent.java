@@ -3,7 +3,9 @@ package com.sion.zhdaily.models.beans;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class NewsContent {
+import java.io.Serializable;
+
+public class NewsContent implements Serializable {
     //id
     private int id;
     //标题
@@ -111,5 +113,17 @@ public class NewsContent {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public NewsContent(int id, String title, String htmlContent, String imageUrl, String cssUrl, int popularity, int longComments, int shortComments, int comments) {
+        this.id = id;
+        this.title = title;
+        this.htmlContent = htmlContent;
+        this.imageUrl = imageUrl;
+        this.cssUrl = cssUrl;
+        this.popularity = popularity;
+        this.longComments = longComments;
+        this.shortComments = shortComments;
+        this.comments = comments;
     }
 }

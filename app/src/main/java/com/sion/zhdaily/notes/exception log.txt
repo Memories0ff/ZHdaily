@@ -24,7 +24,7 @@ I/Process: Sending signal. PID: 20166 SIG: 9
 
 E/AndroidRuntime: FATAL EXCEPTION: main
     Process: com.sion.zhdaily, PID: 26069
-    java.lang.IllegalStateException: The application's PagerAdapter changed the adapter's contents without calling PagerAdapter#notifyDataSetChanged! Expected adapter item count: 5, found: 0 Pager id: com.sion.zhdaily:id/vp Pager class: class androidx.viewpager.widget.ViewPager Problematic adapter: class com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter
+    java.lang.IllegalStateException: The application's PagerAdapter changed the adapter's summaries without calling PagerAdapter#notifyDataSetChanged! Expected adapter item count: 5, found: 0 Pager id: com.sion.zhdaily:id/vp Pager class: class androidx.viewpager.widget.ViewPager Problematic adapter: class com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter
         at androidx.viewpager.widget.ViewPager.populate(ViewPager.java:1143)
         at androidx.viewpager.widget.ViewPager.populate(ViewPager.java:1092)
         at androidx.viewpager.widget.ViewPager$3.run(ViewPager.java:273)
