@@ -72,7 +72,6 @@ public class ContentFragmentPresenter extends BasePresenter<IContentFragmentView
                 });
             } catch (NullPointerException e) {
                 e.printStackTrace();
-            } finally {
                 setLoading(false);
             }
         }).start();

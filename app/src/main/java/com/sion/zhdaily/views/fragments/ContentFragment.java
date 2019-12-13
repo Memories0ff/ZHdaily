@@ -67,9 +67,11 @@ public class ContentFragment extends BaseFragment<IContentFragmentView, ContentF
         final float appbarHeight = getResources().getDimension(R.dimen.news_content_appbar_height);
         nsvNewsContent.setOnTopMovedListener((currentY) -> {
             //随NestedViewScroll中Top的位置确定toolbar的透明度，top越小toolbar越透明，到toolbar高度位置时全透明
-            NewsContentActivity newsContentActivity = (NewsContentActivity) ContentFragment.this.getActivity();
-            float alpha = (currentY - newsContentActivity.tbNewsContent.getHeight()) / (appbarHeight - newsContentActivity.tbNewsContent.getHeight());
-            newsContentActivity.tbNewsContent.setAlpha(alpha);
+            if (currentY > 0) {
+                NewsContentActivity newsContentActivity = (NewsContentActivity) ContentFragment.this.getActivity();
+                float alpha = (currentY - newsContentActivity.tbNewsContent.getHeight()) / (appbarHeight - newsContentActivity.tbNewsContent.getHeight());
+                newsContentActivity.tbNewsContent.setAlpha(alpha < 0 ? 0 : alpha);
+            }
         });
         nsvNewsContent.setOnScrolledListener((oldY, currentY, dy) -> {
             NewsContentActivity newsContentActivity = (NewsContentActivity) ContentFragment.this.getActivity();
@@ -81,14 +83,14 @@ public class ContentFragment extends BaseFragment<IContentFragmentView, ContentF
                 //NestedScrollView向上滚动隐藏toolbar，向下滚动则显示
                 //此层if-else防抖动
                 if (dy < -15) {
-                    if (newsContentActivity.tbNewsContent.getVisibility() != View.VISIBLE) {
-                        newsContentActivity.tbNewsContent.setVisibility(View.VISIBLE);
-                        newsContentActivity.tbNewsContent.setAlpha(1);
-                    }
+//                    if (newsContentActivity.tbNewsContent.getVisibility() != View.VISIBLE) {
+                    newsContentActivity.tbNewsContent.setVisibility(View.VISIBLE);
+                    newsContentActivity.tbNewsContent.setAlpha(1);
+//                    }
                 } else if (dy > 0) {
-                    if (newsContentActivity.tbNewsContent.getVisibility() != View.GONE) {
-                        newsContentActivity.tbNewsContent.setVisibility(View.GONE);
-                    }
+//                    if (newsContentActivity.tbNewsContent.getVisibility() != View.GONE) {
+                    newsContentActivity.tbNewsContent.setVisibility(View.GONE);
+//                    }
                 }
             }
         });
@@ -109,13 +111,13 @@ public class ContentFragment extends BaseFragment<IContentFragmentView, ContentF
 
     @Override
     public void onResume() {
-        nsvNewsContent.startUiChangeThread();
+//        nsvNewsContent.startUiChangeThread();
         super.onResume();
     }
 
     @Override
     public void onPause() {
-        nsvNewsContent.stopUiChangeThread();
+//        nsvNewsContent.stopUiChangeThread();
         super.onPause();
     }
 

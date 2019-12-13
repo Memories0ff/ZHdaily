@@ -118,7 +118,7 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
             }
             TextView textView = view.findViewById(R.id.tv_topNewsTitle);
             textView.setText(mSummaries.get(i).getTitle());
-            view.setOnClickListener(new OnPagerClickListener(mContext, vp.getCurrentItem(), mSummaries));
+            view.setOnClickListener(new OnPagerClickListener(mContext, i, mSummaries));
             mViews.add(view);
         }
     }

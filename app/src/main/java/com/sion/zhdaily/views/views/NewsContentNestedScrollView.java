@@ -1,7 +1,9 @@
 package com.sion.zhdaily.views.views;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,38 +40,51 @@ public class NewsContentNestedScrollView extends NestedScrollView {
         });
     }
 
-    //用于下拉上滑时改变ToolBar的透明度
-    Thread uiChangeThread;
-    //是否执行线程内部的代码
-    boolean isUiChangeThreadAvailable = false;
-
-    //启动线程，activity执行onResume方法时用
-    public void startUiChangeThread() {
-        isUiChangeThreadAvailable = true;
-        uiChangeThread = new Thread(() -> {
-            while (true) {
-                try {
-                    //一秒30次循环
-                    Thread.sleep((long) (1000.0 / 30));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                if (!isUiChangeThreadAvailable) {
-                    break;
-                }
-                if (onTopMovedListener != null && getY() > 1) {
-                    //?????????可能存在问题
-                    onTopMovedListener.topMove(getY());
-                }
-            }
-        });
-        uiChangeThread.start();
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        System.out.println(getY());
+        onTopMovedListener.topMove(getY());
     }
 
-    //停止线程，在activity执行onPause方法时用
-    public void stopUiChangeThread() {
-        isUiChangeThreadAvailable = false;
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        onTopMovedListener.topMove(getY());
+        return super.dispatchTouchEvent(ev);
     }
+
+//    //用于下拉上滑时改变ToolBar的透明度
+//    Thread uiChangeThread;
+//    //是否执行线程内部的代码
+//    boolean isUiChangeThreadAvailable = false;
+//
+//    //启动线程，activity执行onResume方法时用
+//    public void startUiChangeThread() {
+//        isUiChangeThreadAvailable = true;
+//        uiChangeThread = new Thread(() -> {
+//            while (true) {
+//                try {
+//                    //一秒30次循环
+//                    Thread.sleep((long) (1000.0 / 30));
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//                if (!isUiChangeThreadAvailable) {
+//                    break;
+//                }
+//                if (onTopMovedListener != null && getY() > 1) {
+//                    //?????????可能存在问题
+////                    onTopMovedListener.topMove(getY());
+//                }
+//            }
+//        });
+//        uiChangeThread.start();
+//    }
+//
+//    //停止线程，在activity执行onPause方法时用
+//    public void stopUiChangeThread() {
+//        isUiChangeThreadAvailable = false;
+//    }
 
     //接口
     @FunctionalInterface

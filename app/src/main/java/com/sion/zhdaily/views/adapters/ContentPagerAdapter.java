@@ -1,5 +1,7 @@
 package com.sion.zhdaily.views.adapters;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -36,7 +38,10 @@ public class ContentPagerAdapter extends FragmentStatePagerAdapter {
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
+                if (state == 0) {
+                    mActivity.tbNewsContent.setVisibility(View.VISIBLE);
+                    mActivity.tbNewsContent.setAlpha(1);
+                }
             }
         });
     }

@@ -47,11 +47,14 @@ public class MainPresenter extends BasePresenter<IMainView> {
                 });
             }).start();
         }
+        //??????????????????
     }
 
     //加载内容
     public void loadData() {
+        //?????????????????
         mainModel.getNewsSummariesDayByDay();
+        //?????????????????
     }
 
     //---------------------------------------更新---------------------------------------
@@ -75,6 +78,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
                 }
             }).start();
         } else {
+            //?????????????
             getView().toast("网络不可用");
         }
     }

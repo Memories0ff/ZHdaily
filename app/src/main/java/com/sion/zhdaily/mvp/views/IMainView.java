@@ -16,7 +16,7 @@ public interface IMainView extends IBaseView {
     //更新简介和头条
     void updateForChangeAll();
 
-    //设置UI为正在更新的状态
+    //设置UI为正在更新的状态，参数表示是否为继续加载，true为继续，false为更新
     void uiSwitchToLoading(boolean isContinue);
 
     //设置UI为不在更新的状态
