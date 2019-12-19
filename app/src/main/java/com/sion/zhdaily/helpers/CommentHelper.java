@@ -2,8 +2,8 @@ package com.sion.zhdaily.helpers;
 
 import android.content.Context;
 
-import com.sion.zhdaily.models.CommentUtil;
-import com.sion.zhdaily.models.beans.Comment;
+import com.sion.zhdaily.utils.CommentUtil;
+import com.sion.zhdaily.utils.beans.Comment;
 
 import java.util.ArrayList;
 import java.util.List;

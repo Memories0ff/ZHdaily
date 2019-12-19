@@ -8,10 +8,10 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 
 import com.sion.zhdaily.helpers.CommentHelper;
-import com.sion.zhdaily.models.beans.Comment;
 import com.sion.zhdaily.mvp.models.CommentsModel;
 import com.sion.zhdaily.mvp.views.ICommentsView;
-import com.sion.zhdaily.utils.base.BasePresenter;
+import com.sion.zhdaily.tools.base.BasePresenter;
+import com.sion.zhdaily.utils.beans.Comment;
 
 import java.util.List;
 

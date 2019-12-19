@@ -3,7 +3,7 @@ package com.sion.zhdaily.mvp.models;
 import android.content.Context;
 
 import com.sion.zhdaily.helpers.DBHelper;
-import com.sion.zhdaily.utils.base.BaseModel;
+import com.sion.zhdaily.tools.base.BaseModel;
 
 public class ContentModel extends BaseModel {
     //数据库操作帮助类

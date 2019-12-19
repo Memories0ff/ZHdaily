@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.models.beans.NewsSummary;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
 import com.sion.zhdaily.views.activities.NewsContentActivity;
 import com.sion.zhdaily.views.views.NewsSummaryItemDecoration;

@@ -1,10 +1,10 @@
-package com.sion.zhdaily.models;
+package com.sion.zhdaily.utils;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.sion.zhdaily.helpers.DBHelper;
-import com.sion.zhdaily.models.beans.Comment;
+import com.sion.zhdaily.utils.beans.Comment;
 
 import org.json.JSONArray;
 import org.json.JSONException;

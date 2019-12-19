@@ -6,6 +6,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 
@@ -14,12 +15,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.mvp.presenters.ContentFragmentPresenter;
 import com.sion.zhdaily.mvp.views.IContentFragmentView;
-import com.sion.zhdaily.utils.base.BaseFragment;
+import com.sion.zhdaily.tools.base.BaseFragment;
 import com.sion.zhdaily.views.activities.NewsContentActivity;
 import com.sion.zhdaily.views.views.NewsContentNestedScrollView;
 
 public class ContentFragment extends BaseFragment<IContentFragmentView, ContentFragmentPresenter> implements IContentFragmentView {
-
 
     //appbar
     //标题图片
@@ -43,7 +43,7 @@ public class ContentFragment extends BaseFragment<IContentFragmentView, ContentF
 
     @Override
     protected ContentFragmentPresenter createPresenter() {
-        return new ContentFragmentPresenter();
+        return new ContentFragmentPresenter((NewsContentActivity) getActivity());
     }
 
     @Override
@@ -198,4 +198,15 @@ public class ContentFragment extends BaseFragment<IContentFragmentView, ContentF
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void toast(String str) {
+        Toast.makeText(getActivity(), str, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void loadingFailedHint(String str) {
+        tvLoadingHint.setText(str);
+    }
+
 }

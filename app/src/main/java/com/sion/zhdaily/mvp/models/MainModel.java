@@ -1,8 +1,8 @@
 package com.sion.zhdaily.mvp.models;
 
 import com.sion.zhdaily.helpers.NewsSummariesHelper;
-import com.sion.zhdaily.models.beans.NewsSummary;
-import com.sion.zhdaily.utils.base.BaseModel;
+import com.sion.zhdaily.tools.base.BaseModel;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 
 import java.util.ArrayList;
 

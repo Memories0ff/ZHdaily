@@ -1,4 +1,4 @@
-package com.sion.zhdaily.utils.base;
+package com.sion.zhdaily.tools.base;
 
 public abstract class BasePresenter<V extends IBaseView> {
     V view;

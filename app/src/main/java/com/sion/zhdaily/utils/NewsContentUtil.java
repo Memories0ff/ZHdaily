@@ -1,4 +1,4 @@
-package com.sion.zhdaily.models;
+package com.sion.zhdaily.utils;
 
 import android.util.Log;
 

@@ -1,7 +1,7 @@
 package com.sion.zhdaily.helpers;
 
-import com.sion.zhdaily.models.NewsSummariesUtil;
-import com.sion.zhdaily.models.beans.NewsSummary;
+import com.sion.zhdaily.utils.NewsSummariesUtil;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

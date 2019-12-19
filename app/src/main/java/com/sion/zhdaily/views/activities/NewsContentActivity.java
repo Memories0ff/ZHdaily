@@ -11,10 +11,10 @@ import android.widget.Toolbar;
 import androidx.viewpager.widget.ViewPager;
 
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.mvp.presenters.ContentPresenter;
 import com.sion.zhdaily.mvp.views.IContentView;
-import com.sion.zhdaily.utils.base.BaseFragmentActivity;
+import com.sion.zhdaily.tools.base.BaseFragmentActivity;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 import com.sion.zhdaily.views.adapters.ContentPagerAdapter;
 
 import java.util.ArrayList;

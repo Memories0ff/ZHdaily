@@ -1,4 +1,4 @@
-package com.sion.zhdaily.models.beans;
+package com.sion.zhdaily.utils.beans;
 
 import org.json.JSONException;
 import org.json.JSONObject;

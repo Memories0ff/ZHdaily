@@ -1,4 +1,4 @@
-package com.sion.zhdaily.utils.base;
+package com.sion.zhdaily.tools.base;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 public abstract class BaseFragment<V extends IBaseView, P extends BasePresenter> extends Fragment implements IBaseView {
+
     V view;
     P presenter;
 

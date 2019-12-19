@@ -7,10 +7,10 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 
-import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.mvp.models.MainModel;
 import com.sion.zhdaily.mvp.views.IMainView;
-import com.sion.zhdaily.utils.base.BasePresenter;
+import com.sion.zhdaily.tools.base.BasePresenter;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,15 +46,14 @@ public class MainPresenter extends BasePresenter<IMainView> {
                     getView().uiSwitchToNotLoading();
                 });
             }).start();
+        } else {
+            getView().toast("网络不可用");
         }
-        //??????????????????
     }
 
     //加载内容
     public void loadData() {
-        //?????????????????
         mainModel.getNewsSummariesDayByDay();
-        //?????????????????
     }
 
     //---------------------------------------更新---------------------------------------
@@ -78,7 +77,7 @@ public class MainPresenter extends BasePresenter<IMainView> {
                 }
             }).start();
         } else {
-            //?????????????
+            getView().uiSwitchToNotLoading();
             getView().toast("网络不可用");
         }
     }

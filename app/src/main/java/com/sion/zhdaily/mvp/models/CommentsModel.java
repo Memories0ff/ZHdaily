@@ -4,8 +4,8 @@ import android.app.Activity;
 
 import com.sion.zhdaily.helpers.CommentHelper;
 import com.sion.zhdaily.helpers.DBHelper;
-import com.sion.zhdaily.models.beans.Comment;
-import com.sion.zhdaily.utils.base.BaseModel;
+import com.sion.zhdaily.tools.base.BaseModel;
+import com.sion.zhdaily.utils.beans.Comment;
 
 import java.util.List;
 

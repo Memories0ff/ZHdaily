@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.sion.zhdaily.R;
 import com.sion.zhdaily.mvp.presenters.CommentsPresenter;
 import com.sion.zhdaily.mvp.views.ICommentsView;
-import com.sion.zhdaily.utils.base.BaseActivity;
+import com.sion.zhdaily.tools.base.BaseActivity;
 import com.sion.zhdaily.views.adapters.CommentRvAdapter;
 import com.sion.zhdaily.views.views.CommentRecyclerView;
 

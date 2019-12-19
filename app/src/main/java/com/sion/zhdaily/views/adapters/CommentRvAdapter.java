@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.models.beans.Comment;
+import com.sion.zhdaily.utils.beans.Comment;
 import com.sion.zhdaily.views.activities.CommentsActivity;
 import com.sion.zhdaily.views.views.CommentRecyclerView;
 

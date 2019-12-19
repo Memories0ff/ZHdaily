@@ -1,7 +1,7 @@
 package com.sion.zhdaily.helpers;
 
-import com.sion.zhdaily.models.NewsContentUtil;
-import com.sion.zhdaily.models.beans.NewsContent;
+import com.sion.zhdaily.utils.NewsContentUtil;
+import com.sion.zhdaily.utils.beans.NewsContent;
 
 public class NewsContentHelper {
 

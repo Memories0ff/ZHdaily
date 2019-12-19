@@ -1,8 +1,8 @@
-package com.sion.zhdaily.models;
+package com.sion.zhdaily.utils;
 
 import android.util.Log;
 
-import com.sion.zhdaily.models.beans.NewsSummary;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 
 import org.json.JSONArray;
 import org.json.JSONException;

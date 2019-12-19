@@ -13,10 +13,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.viewpager.widget.ViewPager;
 
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.mvp.presenters.MainPresenter;
 import com.sion.zhdaily.mvp.views.IMainView;
-import com.sion.zhdaily.utils.base.BaseActivity;
+import com.sion.zhdaily.tools.base.BaseActivity;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 import com.sion.zhdaily.views.adapters.NewsSummaryListRvAdapter;
 import com.sion.zhdaily.views.adapters.TopNewsSummaryPagerAdapter;
 import com.sion.zhdaily.views.views.FixedLinearLayoutManager;

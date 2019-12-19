@@ -1,6 +1,6 @@
 package com.sion.zhdaily.mvp.views;
 
-import com.sion.zhdaily.utils.base.IBaseView;
+import com.sion.zhdaily.tools.base.IBaseView;
 
 public interface IContentView extends IBaseView {
 

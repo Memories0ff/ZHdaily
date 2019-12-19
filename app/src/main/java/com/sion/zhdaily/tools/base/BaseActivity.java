@@ -1,4 +1,4 @@
-package com.sion.zhdaily.utils.base;
+package com.sion.zhdaily.tools.base;
 
 import android.app.Activity;
 import android.os.Bundle;

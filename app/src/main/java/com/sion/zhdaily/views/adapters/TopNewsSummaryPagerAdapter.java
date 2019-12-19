@@ -18,7 +18,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.sion.zhdaily.R;
-import com.sion.zhdaily.models.beans.NewsSummary;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 import com.sion.zhdaily.views.activities.MainActivity;
 import com.sion.zhdaily.views.activities.NewsContentActivity;
 
@@ -92,8 +92,6 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
 
     @Override
     public void destroyItem(@NonNull ViewGroup container, int position, @NonNull Object object) {
-        //????????????????????√
-//        container.removeView(mViewList.get(position));
         container.removeView((View) object);
     }
 
@@ -198,8 +196,6 @@ public class TopNewsSummaryPagerAdapter extends PagerAdapter {
             if (ref.get() != null) {
                 ((Activity) adapter.mContext).runOnUiThread(() -> {
                     if (adapter.mSummaries.size() > 0 && !adapter.isLoading()) {
-//                            Toast.makeText(mContext, "测试", Toast.LENGTH_SHORT).show();
-                        //????????此时子线程执行update()，变量mContent改为0，会产生错误，但几率很小
                         adapter.vp.setCurrentItem((adapter.vp.getCurrentItem() + 1) % adapter.mSummaries.size());
                     }
                 });

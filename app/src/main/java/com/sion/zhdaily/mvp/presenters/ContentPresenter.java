@@ -7,11 +7,11 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 
-import com.sion.zhdaily.models.beans.NewsContent;
-import com.sion.zhdaily.models.beans.NewsSummary;
 import com.sion.zhdaily.mvp.models.ContentModel;
 import com.sion.zhdaily.mvp.views.IContentView;
-import com.sion.zhdaily.utils.base.BasePresenter;
+import com.sion.zhdaily.tools.base.BasePresenter;
+import com.sion.zhdaily.utils.beans.NewsContent;
+import com.sion.zhdaily.utils.beans.NewsSummary;
 
 import java.util.ArrayList;
 
@@ -104,7 +104,7 @@ public class ContentPresenter extends BasePresenter<IContentView> {
         this.currentContent = currentContent;
     }
 
-    //滑动至某一条新闻
+    //滑动至前/后一条新闻
     public void toNews(int index) {
         setIndex(index);
         setCurrentSummary(getNewsSummaries().get(getIndex()));

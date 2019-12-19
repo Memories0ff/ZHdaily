@@ -1,4 +1,4 @@
-package com.sion.zhdaily.utils;
+package com.sion.zhdaily.tools;
 
 import android.content.Context;
 import android.util.DisplayMetrics;

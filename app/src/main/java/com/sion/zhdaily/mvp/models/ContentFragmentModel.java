@@ -1,8 +1,8 @@
 package com.sion.zhdaily.mvp.models;
 
 import com.sion.zhdaily.helpers.NewsContentHelper;
-import com.sion.zhdaily.models.beans.NewsContent;
-import com.sion.zhdaily.utils.base.BaseModel;
+import com.sion.zhdaily.tools.base.BaseModel;
+import com.sion.zhdaily.utils.beans.NewsContent;
 
 public class ContentFragmentModel extends BaseModel {
     //新闻内容帮助类
